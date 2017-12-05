@@ -1,0 +1,114 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2014 Altera Corporation. All rights reserved.
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, the Altera Quartus II License Agreement,
+# the Altera MegaCore Function License Agreement, or other 
+# applicable license agreement, including, without limitation, 
+# that your use is for the sole purpose of programming logic 
+# devices manufactured by Altera and sold by Altera or its 
+# authorized distributors.  Please refer to the applicable 
+# agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II 64-Bit
+# Version 14.0.0 Build 200 06/17/2014 SJ Web Edition
+# Date created = 10:17:03  November 16, 2017
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		NumberConvertGame_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Cyclone IV E"
+set_global_assignment -name DEVICE EP4CE115F29C7
+set_global_assignment -name TOP_LEVEL_ENTITY NumberConvertGame
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 14.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "10:17:03  NOVEMBER 16, 2017"
+set_global_assignment -name LAST_QUARTUS_VERSION 14.0
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
+set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name VHDL_FILE NumberConvertGame.vhd
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_location_assignment PIN_Y24 -to enterGuess
+set_location_assignment PIN_E21 -to LEDG0
+set_location_assignment PIN_E22 -to LEDG1
+set_location_assignment PIN_E25 -to LEDG2
+set_location_assignment PIN_E24 -to LEDG3
+set_location_assignment PIN_H21 -to LEDG4
+set_location_assignment PIN_G20 -to LEDG5
+set_location_assignment PIN_G22 -to LEDG6
+set_location_assignment PIN_G21 -to LEDG7
+set_location_assignment PIN_G19 -to LEDR0
+set_location_assignment PIN_F19 -to LEDR1
+set_location_assignment PIN_E19 -to LEDR2
+set_location_assignment PIN_F21 -to LEDR3
+set_location_assignment PIN_F18 -to LEDR4
+set_location_assignment PIN_E18 -to LEDR5
+set_location_assignment PIN_J19 -to LEDR6
+set_location_assignment PIN_H19 -to LEDR7
+set_location_assignment PIN_J17 -to LEDR8
+set_location_assignment PIN_G17 -to LEDR9
+set_location_assignment PIN_J15 -to LEDR10
+set_location_assignment PIN_H16 -to LEDR11
+set_location_assignment PIN_J16 -to LEDR12
+set_location_assignment PIN_H17 -to LEDR13
+set_location_assignment PIN_F15 -to LEDR14
+set_location_assignment PIN_G15 -to LEDR15
+set_location_assignment PIN_G16 -to LEDR16
+set_location_assignment PIN_Y23 -to resetSW17
+set_location_assignment PIN_AB28 -to SW0
+set_location_assignment PIN_AC28 -to SW1
+set_location_assignment PIN_AC27 -to SW2
+set_location_assignment PIN_AD27 -to SW3
+set_location_assignment PIN_AB27 -to SW4
+set_location_assignment PIN_AC26 -to SW5
+set_location_assignment PIN_AD26 -to SW6
+set_location_assignment PIN_AB26 -to SW7
+set_location_assignment PIN_AC25 -to SW8
+set_location_assignment PIN_AB25 -to SW9
+set_location_assignment PIN_AC24 -to SW10
+set_location_assignment PIN_AB24 -to SW11
+set_location_assignment PIN_AB23 -to SW12
+set_location_assignment PIN_AA24 -to SW13
+set_location_assignment PIN_Y2 -to clk
+set_location_assignment PIN_H15 -to LEDR17
+set_location_assignment PIN_AB16 -to h6b
+set_location_assignment PIN_AA16 -to h6c
+set_location_assignment PIN_AB17 -to h6d
+set_location_assignment PIN_AB15 -to h6e
+set_location_assignment PIN_AA15 -to h6f
+set_location_assignment PIN_AC17 -to h6g
+set_location_assignment PIN_AD17 -to h7a
+set_location_assignment PIN_AE17 -to h7b
+set_location_assignment PIN_AG17 -to h7c
+set_location_assignment PIN_AH17 -to h7d
+set_location_assignment PIN_AF17 -to h7e
+set_location_assignment PIN_AG18 -to h7f
+set_location_assignment PIN_AA14 -to h7g
+set_location_assignment PIN_AA17 -to h6a
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
