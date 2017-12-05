@@ -1,14 +1,10 @@
---
--- VHDL Architecture DE2_LCD_lib.Binverter.Binverter_arch
---
 -- Original Creation of LCD workings by - Gerry O'Brien 
---          WWW.DIGITAL-CIRCUITRY.COM
---          at - 15:30:18 26/03/2015
---
--- using Mentor Graphics HDL Designer(TM) 2010.3 (Build 21)
+-- Work taken from "http://www.digital-circuitry.com/Projects_LCD_DISPLAYS.htm"
 
+-- Binverter Game
 -- Tyler Upchurch and Evan Strack
 -- Miami University (C) 2017
+-- ECE 287 Final Project
 
 
 LIBRARY IEEE;
@@ -52,6 +48,7 @@ ENTITY Binverter IS
       Hex_Display_Data_7 : IN     STD_LOGIC;
 		
 		resetSW16 : in  std_logic;  -- control the reset of the game to reset level
+		skipToLevel11, skipToLevel21, skipToLevel30, skipToFinalLoss : in std_logic;  -- buttons to act as asynchronous resets to test different features in the FSM
 		SW0, SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8, SW9, SW10, SW11, SW12, SW13, enterGuess, startGame  : in  std_logic; 
 		LEDG0, LEDG1, LEDG2, LEDG3, LEDG4, LEDG5, LEDG6, LEDG7  : out std_logic; -- output green lights
 		LEDR0, LEDR1, LEDR2, LEDR3, LEDR4, LEDR5, LEDR6, LEDR7, LEDR8, LEDR9, LEDR10  : out std_logic; -- output red lights
@@ -59,19 +56,21 @@ ENTITY Binverter IS
       
    );
 
-END Binverter ;
+END Binverter;
 
---
+
 ARCHITECTURE Binverter_arch OF Binverter IS
 
 	type character_string is array ( 0 to 31 ) of STD_LOGIC_VECTOR( 7 downto 0 );
 	
 	type game_type is (BuggedState, ResetState, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L13, L14, L15, L16, L17, L18, L19, L20, L21, L22, L23, L24, L25, L26, L27, L28, L29, L30, FailIntermediate, FailState, CorrectState, FinalWin, FinalLoss);  -- enumeration to hold our states
 	
+	type level_type is (Level_1, Level_2, Level_3, Level_4, Level_5, Level_6, Level_7, Level_8, Level_9, Level_10, Level_11, Level_12, Level_13, Level_14, Level_15, Level_16, Level_17, Level_18, Level_19, Level_20, Level_21, Level_22, Level_23, Level_24, Level_25, Level_26, Level_27, Level_28, Level_29, Level_30);
+	
 	signal gameState : game_type := ResetState;
+	signal levelState : level_type := Level_1;
 	
 	shared variable lifeCounter : natural range 0 to 255;
-	shared variable currentLevelFlag : natural range 0 to 255;
 	
 	signal counter : std_logic_vector(24 downto 0);  			 -- signal that does the counting for 1 second
 	signal redLightCounter : std_logic_vector(24 downto 0); 	 -- signal that does the counting for 1 second
@@ -179,6 +178,8 @@ ARCHITECTURE Binverter_arch OF Binverter IS
 	signal lcd_display_convertocttobin		 : character_string;
 	signal lcd_display_levelFail		 : character_string;
 	signal lcd_display_levelPass		 : character_string;
+	signal lcd_display_PERFECTFinalWin	 : character_string;
+	signal lcd_display_LOSTONFIRSTROUND	 : character_string;
 	signal lcd_display_finalWin		 : character_string;
 	signal lcd_display_finalLoss		 : character_string;
 	signal lcd_display_bugMessage		 : character_string;
@@ -255,7 +256,7 @@ data_bus_7 <= data_bus(7);
 -- Line 2  CONVERT: dec4321
 
 
--- Level 1							L		E		V		E		L	   :     _     _
+-- Level 1
 lcd_display_level1life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
 									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"20",x"31");
 lcd_display_level1life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
@@ -510,6 +511,10 @@ lcd_display_levelPass <= (x"43",x"4F",x"4E",x"47",x"52",x"41",x"54",x"55",x"4C",
 								  x"20",x"20",x"20",x"4E",x"45",x"58",x"54",x"20",x"4C",x"45",x"56",x"45",x"4C",x"20",x"20",x"20");
 
 -- Final Win and Final Loss strings
+lcd_display_PERFECTFinalWin <= (x"43",x"4F",x"4E",x"47",x"52",x"41",x"54",x"55",x"4C",x"41",x"54",x"49",x"4F",x"4E",x"53",x"21",
+								 x"20",x"50",x"45",x"52",x"46",x"45",x"43",x"54",x"20",x"47",x"41",x"4D",x"45",x"21",x"21",x"20");
+lcd_display_LOSTONFIRSTROUND <= (x"55",x"68",x"2E",x"2E",x"20",x"59",x"6F",x"75",x"20",x"6C",x"6F",x"73",x"74",x"20",x"6F",x"6E",
+								  x"74",x"68",x"65",x"20",x"66",x"69",x"72",x"73",x"74",x"20",x"6C",x"65",x"76",x"65",x"6C",x"21");
 lcd_display_finalWin <= (x"43",x"4F",x"4E",x"47",x"52",x"41",x"54",x"55",x"4C",x"41",x"54",x"49",x"4F",x"4E",x"53",x"21",
 								 x"59",x"6F",x"75",x"20",x"77",x"6F",x"6E",x"20",x"74",x"68",x"65",x"20",x"67",x"61",x"6D",x"65");
 lcd_display_finalLoss <= (x"20",x"20",x"20",x"42",x"65",x"74",x"74",x"65",x"72",x"20",x"6C",x"75",x"63",x"6B",x"20",x"20",
@@ -538,6 +543,39 @@ BEGIN
 
 		if resetSW16 = '1' then   -- asynchronous reset
 			gameState <= ResetState;
+			levelState <= Level_1;
+		elsif skipToLevel11 = '0' then  -- active low - button pressed to go straight to level 11
+			-- Turn off all the lights before entering next state
+			LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
+			LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
+			LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';	
+			
+			gameState <= L11;
+			levelState <= Level_11;
+		elsif skipToLevel21 = '0' then  -- active low - button pressed to go straight to level 21
+			-- Turn off all the lights
+			LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
+			LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
+			LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
+					
+			gameState <= L21;
+			levelState <= Level_21;
+		elsif skipToLevel30 = '0' then  -- active low - button pressed to go straight to level 30
+			-- Turn off all the lights
+			LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
+			LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
+			LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
+					
+			gameState <= L30;
+			levelState <= Level_30;
+		elsif skipToFinalLoss = '0' then  -- active low - button pressed to go straight to Final Loss
+			-- Turn off all the lights
+			LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
+			LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
+			LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
+					
+			gameState <= FinalLoss;
+			levelState <= Level_30;
 		elsif clock_50'event and clock_50 = '1' then  -- rising clock edge
 		
 			if redLightCounter < "1011111010111100001000000" then
@@ -588,6 +626,7 @@ BEGIN
 			when ResetState =>
 				if (startGame = '1') then
 					gameState <= L1;
+					levelState <= Level_1;
 				else 				
 					next_char <= lcd_display_resetMessage(CONV_INTEGER(char_count));
 					
@@ -599,11 +638,11 @@ BEGIN
 					guessEntered := false;
 				
 					lifeCounter := 3;
-					currentLevelFlag := 1;
+					levelState <= Level_1;
 				end if;
 		
 			when L1 => 
-				currentLevelFlag := 1;
+				levelState <= Level_1;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level1life3(CONV_INTEGER(char_count));
@@ -627,7 +666,7 @@ BEGIN
 				end if;
 			
 			when L2 => 
-				currentLevelFlag := 2;
+				levelState <= Level_2;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level2life3(CONV_INTEGER(char_count));
@@ -652,7 +691,7 @@ BEGIN
 			
 			
 			when L3 => 
-				currentLevelFlag := 3;
+				levelState <= Level_3;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level3life3(CONV_INTEGER(char_count));
@@ -676,7 +715,7 @@ BEGIN
 				end if;
 				
 			when L4 => 
-				currentLevelFlag := 4;
+				levelState <= Level_4;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level4life3(CONV_INTEGER(char_count));
@@ -700,7 +739,7 @@ BEGIN
 				end if;
 			
 			when L5 => 
-				currentLevelFlag := 5;
+				levelState <= Level_5;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level5life3(CONV_INTEGER(char_count));
@@ -724,7 +763,7 @@ BEGIN
 				end if;
 			
 			when L6 => 
-				currentLevelFlag := 6;
+				levelState <= Level_6;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level6life3(CONV_INTEGER(char_count));
@@ -748,7 +787,7 @@ BEGIN
 				end if;
 				
 			when L7 => 
-				currentLevelFlag := 7;
+				levelState <= Level_7;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level7life3(CONV_INTEGER(char_count));
@@ -772,7 +811,7 @@ BEGIN
 				end if;			
 			
 			when L8 => 
-				currentLevelFlag := 8;
+				levelState <= Level_8;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level8life3(CONV_INTEGER(char_count));
@@ -796,7 +835,7 @@ BEGIN
 				end if;
 			
 			when L9 => 		
-				currentLevelFlag := 9;			
+				levelState <= Level_9;			
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level9life3(CONV_INTEGER(char_count));
@@ -820,7 +859,7 @@ BEGIN
 				end if;
 			
 			when L10 => 
-				currentLevelFlag := 10;
+				levelState <= Level_10;
 			
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level10life3(CONV_INTEGER(char_count));
@@ -844,7 +883,7 @@ BEGIN
 				end if;
 			
 			when L11 => 
-				currentLevelFlag := 11;
+				levelState <= Level_11;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level11life3(CONV_INTEGER(char_count));
@@ -868,7 +907,7 @@ BEGIN
 				end if;
 
 			when L12 => 
-				currentLevelFlag := 12;
+				levelState <= Level_12;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level12life3(CONV_INTEGER(char_count));
@@ -892,7 +931,7 @@ BEGIN
 				end if;
 				
 			when L13 => 
-				currentLevelFlag := 13;
+				levelState <= Level_13;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level13life3(CONV_INTEGER(char_count));
@@ -916,7 +955,7 @@ BEGIN
 				end if;
 				
 			when L14 => 
-				currentLevelFlag := 14;
+				levelState <= Level_14;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level14life3(CONV_INTEGER(char_count));
@@ -940,7 +979,7 @@ BEGIN
 				end if;
 				
 			when L15 => 
-				currentLevelFlag := 15;
+				levelState <= Level_15;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level15life3(CONV_INTEGER(char_count));
@@ -964,7 +1003,7 @@ BEGIN
 				end if;
 				
 			when L16 =>
-				currentLevelFlag := 16;
+				levelState <= Level_16;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level16life3(CONV_INTEGER(char_count));
@@ -988,7 +1027,7 @@ BEGIN
 				end if; 
 				
 			when L17 => 
-				currentLevelFlag := 17;
+				levelState <= Level_17;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level17life3(CONV_INTEGER(char_count));
@@ -1012,7 +1051,7 @@ BEGIN
 				end if;
 				
 			when L18 => 
-				currentLevelFlag := 18;
+				levelState <= Level_18;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level18life3(CONV_INTEGER(char_count));
@@ -1036,7 +1075,7 @@ BEGIN
 				end if;
 				
 			when L19 => 
-				currentLevelFlag := 19;
+				levelState <= Level_19;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level19life3(CONV_INTEGER(char_count));
@@ -1060,7 +1099,7 @@ BEGIN
 				end if;
 				
 			when L20 => 
-				currentLevelFlag := 20;
+				levelState <= Level_20;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level20life3(CONV_INTEGER(char_count));
@@ -1084,7 +1123,7 @@ BEGIN
 				end if;
 				
 			when L21 => 
-				currentLevelFlag := 21;
+				levelState <= Level_21;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level21life3(CONV_INTEGER(char_count));
@@ -1108,7 +1147,7 @@ BEGIN
 				end if;
 				
 			when L22 => 
-				currentLevelFlag := 22;
+				levelState <= Level_22;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level22life3(CONV_INTEGER(char_count));
@@ -1132,7 +1171,7 @@ BEGIN
 				end if;
 				
 			when L23 =>
-				currentLevelFlag := 23;
+				levelState <= Level_23;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level23life3(CONV_INTEGER(char_count));
@@ -1156,7 +1195,7 @@ BEGIN
 				end if;
 				
 			when L24 => 
-				currentLevelFlag := 24;
+				levelState <= Level_24;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level24life3(CONV_INTEGER(char_count));
@@ -1180,7 +1219,7 @@ BEGIN
 				end if;
 				
 			when L25 => 
-				currentLevelFlag := 25;
+				levelState <= Level_25;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level25life3(CONV_INTEGER(char_count));
@@ -1204,7 +1243,7 @@ BEGIN
 				end if;
 				
 			when L26 => 
-				currentLevelFlag := 26;
+				levelState <= Level_26;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level26life3(CONV_INTEGER(char_count));
@@ -1228,7 +1267,7 @@ BEGIN
 				end if;
 				
 			when L27 =>
-				currentLevelFlag := 27;
+				levelState <= Level_27;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level27life3(CONV_INTEGER(char_count));
@@ -1252,7 +1291,7 @@ BEGIN
 				end if;
 				
 			when L28 => 
-				currentLevelFlag := 28;
+				levelState <= Level_28;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level28life3(CONV_INTEGER(char_count));
@@ -1276,7 +1315,7 @@ BEGIN
 				end if;
 				
 			when L29 => 
-				currentLevelFlag := 29;
+				levelState <= Level_29;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level29life3(CONV_INTEGER(char_count));
@@ -1300,7 +1339,7 @@ BEGIN
 				end if;
 				
 			when L30 => 
-				currentLevelFlag := 30;
+				levelState <= Level_30;
 				
 				if (lifeCounter = 3) then
 					next_char <= lcd_display_level30life3(CONV_INTEGER(char_count));
@@ -1372,69 +1411,73 @@ BEGIN
 					LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
 					LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
 					
-					if (currentLevelFlag = 1) then
-						gameState <= L1;
-					elsif (currentLevelFlag = 2) then
-						gameState <= L2;
-					elsif (currentLevelFlag = 3) then
-						gameState <= L3;
-					elsif (currentLevelFlag = 4) then
-						gameState <= L4;
-					elsif (currentLevelFlag = 5) then
-						gameState <= L5;
-					elsif (currentLevelFlag = 6) then
-						gameState <= L6;
-					elsif (currentLevelFlag = 7) then
-						gameState <= L7;
-					elsif (currentLevelFlag = 8) then
-						gameState <= L8;
-					elsif (currentLevelFlag = 9) then
-						gameState <= L9;
-					elsif (currentLevelFlag = 10) then
-						gameState <= L10;
-					elsif (currentLevelFlag = 11) then
-						gameState <= L11;
-					elsif (currentLevelFlag = 12) then
-						gameState <= L12;
-					elsif (currentLevelFlag = 13) then
-						gameState <= L13;
-					elsif (currentLevelFlag = 14) then
-						gameState <= L14;
-					elsif (currentLevelFlag = 15) then
-						gameState <= L15;
-					elsif (currentLevelFlag = 16) then
-						gameState <= L16;
-					elsif (currentLevelFlag = 17) then
-						gameState <= L17;
-					elsif (currentLevelFlag = 18) then
-						gameState <= L18;
-					elsif (currentLevelFlag = 19) then
-						gameState <= L19;
-					elsif (currentLevelFlag = 20) then
-						gameState <= L20;
-					elsif (currentLevelFlag = 21) then
-						gameState <= L21;
-					elsif (currentLevelFlag = 22) then
-						gameState <= L22;
-					elsif (currentLevelFlag = 23) then
-						gameState <= L23;
-					elsif (currentLevelFlag = 24) then
-						gameState <= L24;
-					elsif (currentLevelFlag = 25) then
-						gameState <= L25;
-					elsif (currentLevelFlag = 26) then
-						gameState <= L26;
-					elsif (currentLevelFlag = 27) then
-						gameState <= L27;
-					elsif (currentLevelFlag = 28) then
-						gameState <= L28;
-					elsif (currentLevelFlag = 29) then
-						gameState <= L29;
-					elsif (currentLevelFlag = 30) then
-						gameState <= L30;
-					else
-						gameState <= BuggedState;
-					end if;
+					CASE (levelState) IS
+					
+						when Level_1 =>
+							gameState <= L1;
+						when Level_2 =>
+							gameState <= L2;
+						when Level_3 =>
+							gameState <= L3;
+						when Level_4 =>
+							gameState <= L4;
+						when Level_5 =>
+							gameState <= L5;
+						when Level_6 =>
+							gameState <= L6;
+						when Level_7 =>
+							gameState <= L7;
+						when Level_8 =>
+							gameState <= L8;
+						when Level_9 =>
+							gameState <= L9;
+						when Level_10 =>
+							gameState <= L10;
+						when Level_11 =>
+							gameState <= L11;
+						when Level_12 =>
+							gameState <= L12;
+						when Level_13 =>
+							gameState <= L13;
+						when Level_14 =>
+							gameState <= L14;
+						when Level_15 =>
+							gameState <= L15;
+						when Level_16 =>
+							gameState <= L16;
+						when Level_17 =>
+							gameState <= L17;
+						when Level_18 =>
+							gameState <= L18;
+						when Level_19 =>
+							gameState <= L19;
+						when Level_20 =>
+							gameState <= L20;
+						when Level_21 =>
+							gameState <= L21;
+						when Level_22 =>
+							gameState <= L22;
+						when Level_23 =>
+							gameState <= L23;
+						when Level_24 =>
+							gameState <= L24;
+						when Level_25 =>
+							gameState <= L25;
+						when Level_26 =>
+							gameState <= L26;
+						when Level_27 =>
+							gameState <= L27;
+						when Level_28 =>
+							gameState <= L28;
+						when Level_29 =>
+							gameState <= L29;
+						when Level_30 =>
+							gameState <= L30;
+						when others =>
+							gameState <= BuggedState;
+							
+					end case;
+					
 				end if;			
 			
 			when CorrectState =>
@@ -1457,83 +1500,105 @@ BEGIN
 					LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
 					LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
 					
-					if (currentLevelFlag = 1) then
-						gameState <= L2;
-					elsif (currentLevelFlag = 2) then
-						gameState <= L3;
-					elsif (currentLevelFlag = 3) then
-						gameState <= L4;
-					elsif (currentLevelFlag = 4) then
-						gameState <= L5;
-					elsif (currentLevelFlag = 5) then
-						gameState <= L6;
-					elsif (currentLevelFlag = 6) then
-						gameState <= L7;
-					elsif (currentLevelFlag = 7) then
-						gameState <= L8;
-					elsif (currentLevelFlag = 8) then
-						gameState <= L9;
-					elsif (currentLevelFlag = 9) then
-						gameState <= L10;
-					elsif (currentLevelFlag = 10) then
-						gameState <= L11;
-					elsif (currentLevelFlag = 11) then
-						gameState <= L12;
-					elsif (currentLevelFlag = 12) then
-						gameState <= L13;
-					elsif (currentLevelFlag = 13) then
-						gameState <= L14;
-					elsif (currentLevelFlag = 14) then
-						gameState <= L15;
-					elsif (currentLevelFlag = 15) then
-						gameState <= L16;
-					elsif (currentLevelFlag = 16) then
-						gameState <= L17;
-					elsif (currentLevelFlag = 17) then
-						gameState <= L18;
-					elsif (currentLevelFlag = 18) then
-						gameState <= L19;
-					elsif (currentLevelFlag = 19) then
-						gameState <= L20;
-					elsif (currentLevelFlag = 20) then
-						gameState <= L21;
-					elsif (currentLevelFlag = 21) then
-						gameState <= L22;
-					elsif (currentLevelFlag = 22) then
-						gameState <= L23;
-					elsif (currentLevelFlag = 23) then
-						gameState <= L24;
-					elsif (currentLevelFlag = 24) then
-						gameState <= L25;
-					elsif (currentLevelFlag = 25) then
-						gameState <= L26;
-					elsif (currentLevelFlag = 26) then
-						gameState <= L27;
-					elsif (currentLevelFlag = 27) then
-						gameState <= L28;
-					elsif (currentLevelFlag = 28) then
-						gameState <= L29;
-					elsif (currentLevelFlag = 29) then
-						gameState <= L30;
-					elsif (currentLevelFlag = 30) then
-						gameState <= FinalWin;
-					else
-						gameState <= BuggedState;
-					end if;
+					CASE (levelState) IS
+					
+						when Level_1 =>
+							gameState <= L2;
+						when Level_2 =>
+							gameState <= L3;
+						when Level_3 =>
+							gameState <= L4;
+						when Level_4 =>
+							gameState <= L5;
+						when Level_5 =>
+							gameState <= L6;
+						when Level_6 =>
+							gameState <= L7;
+						when Level_7 =>
+							gameState <= L8;
+						when Level_8 =>
+							gameState <= L9;
+						when Level_9 =>
+							gameState <= L10;
+						when Level_10 =>
+							gameState <= L11;
+						when Level_11 =>
+							gameState <= L12;
+						when Level_12 =>
+							gameState <= L13;
+						when Level_13 =>
+							gameState <= L14;
+						when Level_14 =>
+							gameState <= L15;
+						when Level_15 =>
+							gameState <= L16;
+						when Level_16 =>
+							gameState <= L17;
+						when Level_17 =>
+							gameState <= L18;
+						when Level_18 =>
+							gameState <= L19;
+						when Level_19 =>
+							gameState <= L20;
+						when Level_20 =>
+							gameState <= L21;
+						when Level_21 =>
+							gameState <= L22;
+						when Level_22 =>
+							gameState <= L23;
+						when Level_23 =>
+							gameState <= L24;
+						when Level_24 =>
+							gameState <= L25;
+						when Level_25 =>
+							gameState <= L26;
+						when Level_26 =>
+							gameState <= L27;
+						when Level_27 =>
+							gameState <= L28;
+						when Level_28 =>
+							gameState <= L29;
+						when Level_29 =>
+							gameState <= L30;
+						when Level_30 =>
+							gameState <= FinalWin;
+						when others =>
+							gameState <= BuggedState;
+							
+					end case;
+					
 				end if;
 			
 			when FinalWin =>
-				-- turn on the green lights
-				LEDG0 <= '1'; LEDG1 <= '1'; LEDG2 <= '1'; LEDG3 <= '1'; LEDG4 <= '1'; LEDG5 <= '1'; LEDG6 <= '1'; LEDG7 <= '1';
+				if (lifeCounter > 3) then
+					-- turn on the green lights
+					LEDG0 <= '1'; LEDG1 <= '1'; LEDG2 <= '1'; LEDG3 <= '1'; LEDG4 <= '1'; LEDG5 <= '1'; LEDG6 <= '1'; LEDG7 <= '1';
 				
-				next_char <= lcd_display_finalWin(CONV_INTEGER(char_count));
+					next_char <= lcd_display_PERFECTFinalWin(CONV_INTEGER(char_count));					
+				else
+					-- turn on the green lights
+					LEDG0 <= '1'; LEDG1 <= '1'; LEDG2 <= '1'; LEDG3 <= '1'; LEDG4 <= '1'; LEDG5 <= '1'; LEDG6 <= '1'; LEDG7 <= '1';
+				
+					next_char <= lcd_display_finalWin(CONV_INTEGER(char_count));
+				end if;
 			
 			when FinalLoss =>
-				-- turn on the red lights
-				LEDR0 <= '1'; LEDR1 <= '1'; LEDR2 <= '1'; LEDR3 <= '1'; LEDR4 <= '1'; LEDR5 <= '1'; LEDR6 <= '1'; LEDR7 <= '1'; LEDR8 <= '1'; LEDR9 <= '1';
-				LEDR10 <= '1'; LEDR11 <= '1'; LEDR12 <= '1'; LEDR13 <= '1'; LEDR14 <= '1'; LEDR15 <= '1'; LEDR16 <= '1'; LEDR17 <= '1';
+				CASE (levelState) IS
 				
-				next_char <= lcd_display_finalLoss(CONV_INTEGER(char_count));
+					when Level_1 =>
+						-- turn on the red lights
+						LEDR0 <= '1'; LEDR1 <= '1'; LEDR2 <= '1'; LEDR3 <= '1'; LEDR4 <= '1'; LEDR5 <= '1'; LEDR6 <= '1'; LEDR7 <= '1'; LEDR8 <= '1'; LEDR9 <= '1';
+						LEDR10 <= '1'; LEDR11 <= '1'; LEDR12 <= '1'; LEDR13 <= '1'; LEDR14 <= '1'; LEDR15 <= '1'; LEDR16 <= '1'; LEDR17 <= '1';
+				
+						next_char <= lcd_display_LOSTONFIRSTROUND(CONV_INTEGER(char_count));
+						
+					when others =>
+						-- turn on the red lights
+						LEDR0 <= '1'; LEDR1 <= '1'; LEDR2 <= '1'; LEDR3 <= '1'; LEDR4 <= '1'; LEDR5 <= '1'; LEDR6 <= '1'; LEDR7 <= '1'; LEDR8 <= '1'; LEDR9 <= '1';
+						LEDR10 <= '1'; LEDR11 <= '1'; LEDR12 <= '1'; LEDR13 <= '1'; LEDR14 <= '1'; LEDR15 <= '1'; LEDR16 <= '1'; LEDR17 <= '1';
+				
+						next_char <= lcd_display_finalLoss(CONV_INTEGER(char_count));
+				end case;
 			
 			when others =>
 				gameState <= ResetState;
