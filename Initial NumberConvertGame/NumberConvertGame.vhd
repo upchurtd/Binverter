@@ -11,14 +11,15 @@ entity NumberConvertGame is
     LEDG0, LEDG1, LEDG2, LEDG3, LEDG4, LEDG5, LEDG6, LEDG7  : out std_logic; -- output green lights
 	 LEDR0, LEDR1, LEDR2, LEDR3, LEDR4, LEDR5, LEDR6, LEDR7, LEDR8, LEDR9, LEDR10  : out std_logic; -- output red lights
 	 LEDR11, LEDR12, LEDR13, LEDR14, LEDR15, LEDR16, LEDR17  : out std_logic; -- output red lights
-	 h7a, h7b, h7c, h7d, h7e, h7f, h7g, h6a, h6b, h6c, h6d, h6e, h6f, h6g, h3a, h3b, h3c, h3d, h3e, h3f, h2a, h2b, h2c, h2d, h2e, h2f, h2g,
-	 h1a, h1b, h1c, h1d, h1e, h1f, h1g, h0a, h0b, h0c, h0d, h0e, h0f, h0g : out std_logic); -- output level to hex
-
+	 h7a, h7b, h7c, h7d, h7e, h7f, h7g, h6a, h6b, h6c, h6d, h6e, h6f, h6g : out std_logic; -- output level number
+	 h5a, h5b, h5c, h5d, h5e, h5f, h5g, h4a, h4b, h4c, h4d, h4e, h4f, h4g : out std_logic; -- output number of lives
+	 h3a, h3b, h3c, h3d, h3e, h3f, h3g, h2a, h2b, h2c, h2d, h2e, h2f, h2g, h1a, h1b, h1c, h1d, h1e, h1f, h1g, h0a, h0b, h0c, h0d, h0e, h0f, h0g : out std_logic); -- output the number to convert
+	 
 end NumberConvertGame;
 
 architecture behavior of NumberConvertGame is
 
-	type state_type is (L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L13, L14, L15, L16, L17, L18, L19, L20, L21, L22, L23, L24, L25, L26, L27, L28, L29, L30, FailState, CorrectState, FinalWin, FinalLoss);  -- enumeration to hold our states
+	type state_type is (ResetState, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L13, L14, L15, L16, L17, L18, L19, L20, L21, L22, L23, L24, L25, L26, L27, L28, L29, L30, FailState, CorrectState, FinalWin, FinalLoss);  -- enumeration to hold our states
 	signal state : state_type := L1;
 	
 	shared variable lifeCounter : natural range 0 to 255;
@@ -40,21 +41,39 @@ begin  -- behavior
 	begin  -- process gameProcess
 	
 		if resetSW17 = '1' then   -- asynchronous reset
-			state <= L1;
+			state <= ResetState;
 		elsif clk'event and clk = '1' then  -- rising clock edge
-	   		
+		
       case state is
+				
+			when ResetState =>
+				lifeCounter := 3;
+				state <= L1;
 		
 			when L1 => 
+				currentLevelFlag := 1;
+				
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1'; -- displays on hex what the current level is
 				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1'; -- displays on hex what the current level is
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else
+					state <= FinalLoss;
+				end if;				
+				
+				h3a <= '1'; h3b <= '0'; h3c <= '0'; h3d <= '1'; h3e <= '1'; h3f <= '1'; h3g <= '1'; -- displays value to be converted
+				h2a <= '1'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
 				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
-				--h3a <= '1'; h3b <= '0'; h3c <= '0'; h3d <= '1'; h3e <= '1'; h3f <= '1'; h3g <= '1'; -- displays value to be converted
-				--h2a <= '1'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
-				--h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
-				--h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
-				currentLevelFlag := 1;
-				lifeCounter := 3;  
+				
 				if (enterGuess = '1') then
 					-- Number base10 1
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '0' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
@@ -469,7 +488,7 @@ begin  -- behavior
 				LEDR16 <= REDLIGHT_CONTROLLER;
 				LEDR17 <= REDLIGHT_CONTROLLER;
 				
-				if (delay5sIsOver) then
+				if (delay10sIsOver) then
 					if (currentLevelFlag = 1) then
 						state <= L1;
 					elsif (currentLevelFlag = 2) then
@@ -477,60 +496,60 @@ begin  -- behavior
 					elsif (currentLevelFlag = 3) then
 						state <= L3;
 					elsif (currentLevelFlag = 4) then
-					state <= L4;
-				elsif (currentLevelFlag = 5) then
-					state <= L5;
-				elsif (currentLevelFlag = 6) then
-					state <= L6;
-				elsif (currentLevelFlag = 7) then
-					state <= L7;
-				elsif (currentLevelFlag = 8) then
-					state <= L8;
-				elsif (currentLevelFlag = 9) then
-					state <= L9;
-				elsif (currentLevelFlag = 10) then
-					state <= L10;
-				elsif (currentLevelFlag = 11) then
-					state <= L11;
-				elsif (currentLevelFlag = 12) then
-					state <= L12;
-				elsif (currentLevelFlag = 13) then
-					state <= L13;
-				elsif (currentLevelFlag = 14) then
-					state <= L14;
-				elsif (currentLevelFlag = 15) then
-					state <= L15;
-				elsif (currentLevelFlag = 16) then
-					state <= L16;
-				elsif (currentLevelFlag = 17) then
-					state <= L17;
-				elsif (currentLevelFlag = 18) then
-					state <= L18;
-				elsif (currentLevelFlag = 19) then
-					state <= L19;
-				elsif (currentLevelFlag = 20) then
-					state <= L20;
-				elsif (currentLevelFlag = 21) then
-					state <= L21;
-				elsif (currentLevelFlag = 22) then
-					state <= L22;
-				elsif (currentLevelFlag = 23) then
-					state <= L23;
-				elsif (currentLevelFlag = 24) then
-					state <= L24;
-				elsif (currentLevelFlag = 25) then
-					state <= L25;
-				elsif (currentLevelFlag = 26) then
-					state <= L26;
-				elsif (currentLevelFlag = 27) then
-					state <= L27;
-				elsif (currentLevelFlag = 28) then
-					state <= L28;
-				elsif (currentLevelFlag = 29) then
-					state <= L29;
-				elsif (currentLevelFlag = 30) then
-					state <= L30;
-				end if;
+						state <= L4;
+					elsif (currentLevelFlag = 5) then
+						state <= L5;
+					elsif (currentLevelFlag = 6) then
+						state <= L6;
+					elsif (currentLevelFlag = 7) then
+						state <= L7;
+					elsif (currentLevelFlag = 8) then
+						state <= L8;
+					elsif (currentLevelFlag = 9) then
+						state <= L9;
+					elsif (currentLevelFlag = 10) then
+						state <= L10;
+					elsif (currentLevelFlag = 11) then
+						state <= L11;
+					elsif (currentLevelFlag = 12) then
+						state <= L12;
+					elsif (currentLevelFlag = 13) then
+						state <= L13;
+					elsif (currentLevelFlag = 14) then
+						state <= L14;
+					elsif (currentLevelFlag = 15) then
+						state <= L15;
+					elsif (currentLevelFlag = 16) then
+						state <= L16;
+					elsif (currentLevelFlag = 17) then
+						state <= L17;
+					elsif (currentLevelFlag = 18) then
+						state <= L18;
+					elsif (currentLevelFlag = 19) then
+						state <= L19;
+					elsif (currentLevelFlag = 20) then
+						state <= L20;
+					elsif (currentLevelFlag = 21) then
+						state <= L21;
+					elsif (currentLevelFlag = 22) then
+						state <= L22;
+					elsif (currentLevelFlag = 23) then
+						state <= L23;
+					elsif (currentLevelFlag = 24) then
+						state <= L24;
+					elsif (currentLevelFlag = 25) then
+						state <= L25;
+					elsif (currentLevelFlag = 26) then
+						state <= L26;
+					elsif (currentLevelFlag = 27) then
+						state <= L27;
+					elsif (currentLevelFlag = 28) then
+						state <= L28;
+					elsif (currentLevelFlag = 29) then
+						state <= L29;
+					elsif (currentLevelFlag = 30) then
+						state <= L30;
+					end if;
 				end if;			
 			
 			when CorrectState =>
@@ -653,10 +672,10 @@ begin  -- behavior
 				end if;
 				
 				-- Reset these when they are not in use
-				if (enterGuess = '0') then
-					delay_5s <= (others => '0');
-					delay_10s <= (others => '0');
-				end if;				
+				--if (enterGuess = '0') then
+				--	delay_5s <= (others => '0');
+				--	delay_10s <= (others => '0');
+				--end if;				
 			end if;
 			
 		end if;
