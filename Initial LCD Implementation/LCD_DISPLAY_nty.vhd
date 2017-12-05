@@ -62,33 +62,122 @@ END LCD_DISPLAY_nty ;
 
 --
 ARCHITECTURE LCD_DISPLAY_arch OF LCD_DISPLAY_nty IS
-  type character_string is array ( 0 to 31 ) of STD_LOGIC_VECTOR( 7 downto 0 );
+	type character_string is array ( 0 to 31 ) of STD_LOGIC_VECTOR( 7 downto 0 );
   
-  type state_type is (hold, func_set, display_on, mode_set, print_string,
+	type state_type is (hold, func_set, display_on, mode_set, print_string,
                       line2, return_home, drop_lcd_e, reset1, reset2,
                        reset3, display_off, display_clear);
                        
-  signal state, next_command         : state_type;
+	signal state, next_command         : state_type;
   
   
-  signal lcd_display_string          : character_string;
+	signal lcd_display_string          : character_string;
   
-  signal lcd_display_string_01       : character_string;
-  signal lcd_display_string_02       : character_string;
-  signal lcd_display_string_03       : character_string;
-  signal lcd_display_string_04       : character_string;
-  signal lcd_display_string_05       : character_string;
-  signal lcd_display_string_06       : character_string;
-  signal lcd_display_string_07       : character_string;
-  signal lcd_display_string_08       : character_string;
-  signal lcd_display_string_09       : character_string;
-  signal lcd_display_string_10       : character_string;
-  signal lcd_display_string_11       : character_string;
-  
-  signal data_bus_value, next_char   : STD_LOGIC_VECTOR(7 downto 0);
-  signal clk_count_400hz             : STD_LOGIC_VECTOR(19 downto 0);
-  
-  signal char_count                  : STD_LOGIC_VECTOR(4 downto 0);
+	signal lcd_display_string_01       : character_string;
+
+	signal lcd_display_level1life3		 : character_string;
+	signal lcd_display_level1life2		 : character_string;
+	signal lcd_display_level1life1		 : character_string;
+	signal lcd_display_level2life3		 : character_string;
+	signal lcd_display_level2life2		 : character_string;
+	signal lcd_display_level2life1		 : character_string;
+	signal lcd_display_level3life3		 : character_string;
+	signal lcd_display_level3life2		 : character_string;
+	signal lcd_display_level3life1		 : character_string;
+	signal lcd_display_level4life3		 : character_string;
+	signal lcd_display_level4life2		 : character_string;
+	signal lcd_display_level4life1		 : character_string;
+	signal lcd_display_level5life3		 : character_string;
+	signal lcd_display_level5life2		 : character_string;
+	signal lcd_display_level5life1		 : character_string;
+	signal lcd_display_level6life3		 : character_string;
+	signal lcd_display_level6life2		 : character_string;
+	signal lcd_display_level6life1		 : character_string;
+	signal lcd_display_level7life3		 : character_string;
+	signal lcd_display_level7life2		 : character_string;
+	signal lcd_display_level7life1		 : character_string;
+	signal lcd_display_level8life3		 : character_string;
+	signal lcd_display_level8life2		 : character_string;
+	signal lcd_display_level8life1		 : character_string;
+	signal lcd_display_level9life3		 : character_string;
+	signal lcd_display_level9life2		 : character_string;
+	signal lcd_display_level9life1		 : character_string;
+	signal lcd_display_level10life3		 : character_string;
+	signal lcd_display_level10life2		 : character_string;
+	signal lcd_display_level10life1		 : character_string;
+	signal lcd_display_level11life3		 : character_string;
+	signal lcd_display_level11life2		 : character_string;
+	signal lcd_display_level11life1		 : character_string;
+	signal lcd_display_level12life3		 : character_string;
+	signal lcd_display_level12life2		 : character_string;
+	signal lcd_display_level12life1		 : character_string;
+	signal lcd_display_level13life3		 : character_string;
+	signal lcd_display_level13life2		 : character_string;
+	signal lcd_display_level13life1		 : character_string;
+	signal lcd_display_level14life3		 : character_string;
+	signal lcd_display_level14life2		 : character_string;
+	signal lcd_display_level14life1		 : character_string;
+	signal lcd_display_level15life3		 : character_string;
+	signal lcd_display_level15life2		 : character_string;
+	signal lcd_display_level15life1		 : character_string;
+	signal lcd_display_level16life3		 : character_string;
+	signal lcd_display_level16life2		 : character_string;
+	signal lcd_display_level16life1		 : character_string;
+	signal lcd_display_level17life3		 : character_string;
+	signal lcd_display_level17life2		 : character_string;
+	signal lcd_display_level17life1		 : character_string;
+	signal lcd_display_level18life3		 : character_string;
+	signal lcd_display_level18life2		 : character_string;
+	signal lcd_display_level18life1		 : character_string;
+	signal lcd_display_level19life3		 : character_string;
+	signal lcd_display_level19life2		 : character_string;
+	signal lcd_display_level19life1		 : character_string;
+	signal lcd_display_level20life3		 : character_string;
+	signal lcd_display_level20life2		 : character_string;
+	signal lcd_display_level20life1		 : character_string;
+	signal lcd_display_level21life3		 : character_string;
+	signal lcd_display_level21life2		 : character_string;
+	signal lcd_display_level21life1		 : character_string;
+	signal lcd_display_level22life3		 : character_string;
+	signal lcd_display_level22life2		 : character_string;
+	signal lcd_display_level22life1		 : character_string;
+	signal lcd_display_level23life3		 : character_string;
+	signal lcd_display_level23life2		 : character_string;
+	signal lcd_display_level23life1		 : character_string;
+	signal lcd_display_level24life3		 : character_string;
+	signal lcd_display_level24life2		 : character_string;
+	signal lcd_display_level24life1		 : character_string;
+	signal lcd_display_level25life3		 : character_string;
+	signal lcd_display_level25life2		 : character_string;
+	signal lcd_display_level25life1		 : character_string;
+	signal lcd_display_level26life3		 : character_string;
+	signal lcd_display_level26life2		 : character_string;
+	signal lcd_display_level26life1		 : character_string;
+	signal lcd_display_level27life3		 : character_string;
+	signal lcd_display_level27life2		 : character_string;
+	signal lcd_display_level27life1		 : character_string;
+	signal lcd_display_level28life3		 : character_string;
+	signal lcd_display_level28life2		 : character_string;
+	signal lcd_display_level28life1		 : character_string;
+	signal lcd_display_level29life3		 : character_string;
+	signal lcd_display_level29life2		 : character_string;
+	signal lcd_display_level29life1		 : character_string;
+	signal lcd_display_level30life3		 : character_string;
+	signal lcd_display_level30life2		 : character_string;
+	signal lcd_display_level30life1		 : character_string;
+	signal lcd_display_convertdectobin		 : character_string;
+	signal lcd_display_converthextobin		 : character_string;
+	signal lcd_display_convertocttobin		 : character_string;
+	signal lcd_display_levelFail		 : character_string;
+	signal lcd_display_levelPass		 : character_string;
+	signal lcd_display_finalWin		 : character_string;
+	signal lcd_display_finalLoss		 : character_string;
+	signal lcd_display_bugMessage		 : character_string;
+
+signal data_bus_value, next_char   : STD_LOGIC_VECTOR(7 downto 0);
+signal clk_count_400hz             : STD_LOGIC_VECTOR(19 downto 0);
+
+signal char_count                  : STD_LOGIC_VECTOR(4 downto 0);
   signal clk_400hz_enable,lcd_rw_int : std_logic;
   
   signal Hex_Display_Data            : STD_LOGIC_VECTOR(7 DOWNTO 0); 
@@ -262,184 +351,284 @@ LCD_CHAR_ARRAY(3) <= LCD_CHAR_ARRAY_3;
 -- -> = x"7E",
 -- <- = x"7F",
 
+-- Lives: 3
+--x"4C",x"49",x"56",x"45",x"53",x"3A",x"33"
+-- Lives: 2
+--x"4C",x"49",x"56",x"45",x"53",x"3A",x"32"
+-- Lives: 1
+--x"4C",x"49",x"56",x"45",x"53",x"3A",x"31"
+
+-- CONVERT: dec4321
+-- x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"34",x"33",x"32",x"31"
+
+-- General structure of the level strings
+-- Line 1  LEVEL:30 LIVES:3 
+-- Line 2  CONVERT: dec4321
 
 
- lcd_display_string_01 <= 
-  (
--- Line 1    L    E     V     E    L      :     3      0          L      I    V      E     S     :    3 
-          x"4C",x"45",x"56",x"45",x"4C",x"3A",x"33",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
-   
--- Line 2   C    O      N    V      E     R     T     :            d     e    c     4      3     2    1
-          x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"34",x"33",x"32",x"31" 
-   );
-   
-   
-   
-   
-   
-   
-   
---========================================================================================================================================================================================== 
-   lcd_display_string_02 <= 
-  (
--- Line 1    B    l     u     e    t      o     o     t     h          L      i     n     k 
-          x"42",x"6C",x"75",x"65",x"74",x"6F",x"6F",x"74",x"68",x"20",x"4C",x"69",x"6E",x"6B",x"20",x"20",
-   
--- Line 2   ->    C     O     N     N      E    C      T    E     D
-          x"7E",x"43",x"4F",x"4E",x"4E",x"45",x"43",x"54",x"45",x"44",x"20",x"20",x"20",x"20",x"20",x"20"  
-   ); 
-   
+-- Level 1							L		E		V		E		L	   :     _     _
+lcd_display_level1life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"20",x"31");
+lcd_display_level1life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"20",x"31");
+lcd_display_level1life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"20",x"31");
 
+-- Level 2
+lcd_display_level2life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"32",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"20",x"36");
+lcd_display_level2life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"32",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"20",x"36");
+lcd_display_level2life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"32",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"20",x"36");
 
+-- Level 3
+lcd_display_level3life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"33",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"31",x"37");
+lcd_display_level3life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"33",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"31",x"37");
+lcd_display_level3life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"33",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"31",x"37");
 
+-- Level 4
+lcd_display_level4life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"34",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"38",x"36");
+lcd_display_level4life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"34",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"38",x"36");
+lcd_display_level4life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"34",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"20",x"38",x"36");
 
---==========================================================================================================================================================================================    
-   lcd_display_string_03 <= 
-    (
--- Line 1    C    h      a     r     g     i     n      g  
-          x"43",x"68",x"61",x"72",x"67",x"69",x"6E",x"67",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",
-   
--- Line 2   ->     %    2     5 
-          x"7E",x"25",x"32",x"35",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20" 
-   );
-   
-   
+-- Level 5
+lcd_display_level5life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"35",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"31",x"31",x"32");
+lcd_display_level5life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"35",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"31",x"31",x"32");
+lcd_display_level5life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"35",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"31",x"31",x"32");
 
+-- Level 6
+lcd_display_level6life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"36",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"33",x"34",x"31");
+lcd_display_level6life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"36",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"33",x"34",x"31");
+lcd_display_level6life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"36",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"33",x"34",x"31");
 
+-- Level 7
+lcd_display_level7life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"37",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"38",x"39",x"31");
+lcd_display_level7life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"37",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"38",x"39",x"31");
+lcd_display_level7life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"37",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"20",x"38",x"39",x"31");
 
+-- Level 8
+lcd_display_level8life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"38",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"32",x"33",x"36",x"38");
+lcd_display_level8life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"38",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"32",x"33",x"36",x"38");
+lcd_display_level8life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"38",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"32",x"33",x"36",x"38");
 
---==========================================================================================================================================================================================   
-   lcd_display_string_04 <= 
-     (
--- Line 1    C    h      a     r     g     i     n      g  
-          x"43",x"68",x"61",x"72",x"67",x"69",x"6E",x"67",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",
-   
--- Line 2   ->     %    5     0 
-          x"7E",x"25",x"35",x"30",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20" 
-   );
-   
-   
-   
-   
-   
+-- Level 9
+lcd_display_level9life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"39",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"35",x"34",x"35",x"30");
+lcd_display_level9life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"39",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"35",x"34",x"35",x"30");
+lcd_display_level9life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"20",x"39",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									 x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"35",x"34",x"35",x"30");
 
+-- Level 10
+lcd_display_level10life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"38",x"37",x"36",x"31");
+lcd_display_level10life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"38",x"37",x"36",x"31");
+lcd_display_level10life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"64",x"65",x"63",x"38",x"37",x"36",x"31");
 
+-- Level 11
+lcd_display_level11life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"20",x"20",x"39");
+lcd_display_level11life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"20",x"20",x"39");
+lcd_display_level11life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"20",x"20",x"39");
 
+-- Level 12
+lcd_display_level12life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"32",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"20",x"20",x"43");
+lcd_display_level12life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"32",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"20",x"20",x"43");
+lcd_display_level12life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"32",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"20",x"20",x"43");
 
+-- Level 13
+lcd_display_level13life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"33",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"20",x"33",x"32");
+lcd_display_level13life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"33",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"20",x"33",x"32");
+lcd_display_level13life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"33",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"20",x"33",x"32");
 
+-- Level 14
+lcd_display_level14life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"34",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"31",x"41",x"35");
+lcd_display_level14life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"34",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"31",x"41",x"35");
+lcd_display_level14life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"34",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"31",x"41",x"35");
 
---==========================================================================================================================================================================================   
-   lcd_display_string_05 <= 
-        (
--- Line 1    C    h      a     r     g     i     n      g  
-          x"43",x"68",x"61",x"72",x"67",x"69",x"6E",x"67",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",
-   
--- Line 2   ->     %    7     5 
-          x"7E",x"25",x"37",x"35",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20" 
-   );
-   
-   
-    
-   
+-- Level 15
+lcd_display_level15life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"35",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"31",x"46",x"34");
+lcd_display_level15life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"35",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"31",x"46",x"34");
+lcd_display_level15life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"35",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"31",x"46",x"34");
 
+-- Level 16
+lcd_display_level16life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"36",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"46",x"41",x"32");
+lcd_display_level16life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"36",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"46",x"41",x"32");
+lcd_display_level16life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"36",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"20",x"46",x"41",x"32");
 
+-- Level 17
+lcd_display_level17life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"37",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"33",x"46",x"38",x"41");
+lcd_display_level17life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"37",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"33",x"46",x"38",x"41");
+lcd_display_level17life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"37",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"33",x"46",x"38",x"41");
 
+-- Level 18
+lcd_display_level18life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"38",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"32",x"45",x"41",x"41");
+lcd_display_level18life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"38",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"32",x"45",x"41",x"41");
+lcd_display_level18life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"38",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"32",x"45",x"41",x"41");
 
+-- Level 19
+lcd_display_level19life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"39",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"32",x"46",x"39",x"41");
+lcd_display_level19life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"39",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"32",x"46",x"39",x"41");
+lcd_display_level19life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"39",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"32",x"46",x"39",x"41");
 
+-- Level 20
+lcd_display_level20life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"33",x"46",x"46",x"46");
+lcd_display_level20life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"33",x"46",x"46",x"46");
+lcd_display_level20life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"68",x"65",x"78",x"33",x"46",x"46",x"46");
 
---==========================================================================================================================================================================================    
-   lcd_display_string_06 <= 
-       (
--- Line 1    C    h      a     r     g     i     n      g  
-          x"43",x"68",x"61",x"72",x"67",x"69",x"6E",x"67",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",
-   
--- Line 2   ->     %    1     0      0
-          x"7E",x"25",x"31",x"30",x"30",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20" 
-   );
-   
-   
-   
-   
+-- Level 21
+lcd_display_level21life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+								  	  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"20",x"20",x"35");
+lcd_display_level21life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"20",x"20",x"35");
+lcd_display_level21life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"31",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"20",x"20",x"35");
 
+-- Level 22
+lcd_display_level22life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"32",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"20",x"31",x"31");
+lcd_display_level22life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"32",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"20",x"31",x"31");
+lcd_display_level22life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"32",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"20",x"31",x"31");
 
+-- Level 23
+lcd_display_level23life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"33",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"20",x"35",x"33");
+lcd_display_level23life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"33",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"20",x"35",x"33");
+lcd_display_level23life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"33",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"20",x"35",x"33");
 
+-- Level 24
+lcd_display_level24life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"34",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"31",x"31",x"33");
+lcd_display_level24life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"34",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"31",x"31",x"33");
+lcd_display_level24life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"34",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"31",x"31",x"33");
 
+-- Level 25
+lcd_display_level25life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"35",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"36",x"37",x"32");
+lcd_display_level25life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"35",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"36",x"37",x"32");
+lcd_display_level25life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"35",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"36",x"37",x"32");
 
+-- Level 26
+lcd_display_level26life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"36",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"37",x"34",x"31");
+lcd_display_level26life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"36",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"37",x"34",x"31");
+lcd_display_level26life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"31",x"36",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"20",x"37",x"34",x"31");
 
---==========================================================================================================================================================================================    
-   lcd_display_string_07 <= 
-   (
--- Line 1    B    a      t     t     e    r     y          L     e     v      e    l 
-          x"42",x"61",x"74",x"74",x"65",x"72",x"79",x"20",x"4C",x"65",x"76",x"65",x"6C",x"20",x"20",x"20",
-   
--- Line 2   ->     %    2     5 
-          x"7E",x"25",x"32",x"35",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20" 
-   );
-   
-   
-   
+-- Level 27
+lcd_display_level27life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"37",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"31",x"30",x"37",x"36");
+lcd_display_level27life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"37",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"31",x"30",x"37",x"36");
+lcd_display_level27life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"37",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"31",x"30",x"37",x"36");
 
+-- Level 28
+lcd_display_level28life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"38",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"32",x"37",x"34",x"35");
+lcd_display_level28life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"38",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"32",x"37",x"34",x"35");
+lcd_display_level28life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"38",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"32",x"37",x"34",x"35");
 
+-- Level 29
+lcd_display_level29life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"39",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"36",x"37",x"32",x"34");
+lcd_display_level29life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"39",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"36",x"37",x"32",x"34");
+lcd_display_level29life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"32",x"39",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"36",x"37",x"32",x"34");
 
+-- Level 30	
+lcd_display_level30life3 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"33",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"33",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"37",x"37",x"31",x"32");
+lcd_display_level30life2 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"33",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"32",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"37",x"37",x"31",x"32");
+lcd_display_level30life1 <= (x"4C",x"45",x"56",x"45",x"4C",x"3A",x"33",x"30",x"20",x"4C",x"49",x"56",x"45",x"53",x"3A",x"31",
+									  x"43",x"4F",x"4E",x"56",x"45",x"52",x"54",x"3A",x"20",x"6F",x"63",x"74",x"37",x"37",x"31",x"32");
 
+-- Convert ___ to ___ strings
+lcd_display_convertdectobin <= (x"20",x"20",x"20",x"47",x"65",x"74",x"20",x"52",x"65",x"61",x"64",x"79",x"21",x"20",x"20",x"20",
+									     x"43",x"6F",x"6E",x"76",x"65",x"72",x"74",x"20",x"64",x"65",x"63",x"54",x"4F",x"62",x"69",x"6E");
+lcd_display_converthextobin <= (x"20",x"20",x"20",x"47",x"65",x"74",x"20",x"52",x"65",x"61",x"64",x"79",x"21",x"20",x"20",x"20",
+									     x"43",x"6F",x"6E",x"76",x"65",x"72",x"74",x"20",x"68",x"65",x"78",x"54",x"4F",x"62",x"69",x"6E");
+lcd_display_convertocttobin <= (x"20",x"20",x"20",x"47",x"65",x"74",x"20",x"52",x"65",x"61",x"64",x"79",x"21",x"20",x"20",x"20",
+									     x"43",x"6F",x"6E",x"76",x"65",x"72",x"74",x"20",x"6F",x"63",x"74",x"54",x"4F",x"62",x"69",x"6E");
 
---==========================================================================================================================================================================================    
-   lcd_display_string_08 <= 
-    (
---- Line 1    B    a      t     t     e    r     y          L     e     v      e    l 
-          x"42",x"61",x"74",x"74",x"65",x"72",x"79",x"20",x"4C",x"65",x"76",x"65",x"6C",x"20",x"20",x"20",
-   
--- Line 2   ->     %    5     0 
-          x"7E",x"25",x"35",x"30",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20" 
-   );
-   
-   
-   
+-- Intermediate Fail and Correct strings
+lcd_display_levelFail <= (x"20",x"20",x"20",x"49",x"4E",x"43",x"4f",x"52",x"52",x"45",x"43",x"54",x"21",x"20",x"20",x"20",
+								  x"20",x"20",x"20",x"54",x"52",x"59",x"20",x"41",x"47",x"41",x"49",x"4E",x"21",x"20",x"20",x"20");
+lcd_display_levelPass <= (x"43",x"4F",x"4E",x"47",x"52",x"41",x"54",x"55",x"4C",x"41",x"54",x"49",x"4F",x"4E",x"53",x"21",
+								  x"20",x"20",x"20",x"4E",x"45",x"58",x"54",x"20",x"4C",x"45",x"56",x"45",x"4C",x"20",x"20",x"20");
 
+-- Final Win and Final Loss strings
+lcd_display_finalWin <= (x"43",x"4F",x"4E",x"47",x"52",x"41",x"54",x"55",x"4C",x"41",x"54",x"49",x"4F",x"4E",x"53",x"21",
+								 x"59",x"6F",x"75",x"20",x"77",x"6F",x"6E",x"20",x"74",x"68",x"65",x"20",x"67",x"61",x"6D",x"65");
+lcd_display_finalLoss <= (x"20",x"20",x"20",x"42",x"65",x"74",x"74",x"65",x"72",x"20",x"6C",x"75",x"63",x"6B",x"20",x"20",
+								  x"20",x"20",x"20",x"20",x"6E",x"65",x"78",x"74",x"20",x"74",x"69",x"6D",x"65",x"21",x"20",x"20");
 
-
---==========================================================================================================================================================================================    
-   lcd_display_string_09 <= 
-    (
--- Line 1    B    a      t     t     e    r     y          L     e     v      e    l 
-          x"42",x"61",x"74",x"74",x"65",x"72",x"79",x"20",x"4C",x"65",x"76",x"65",x"6C",x"20",x"20",x"20",
-   
--- Line 2   ->     %    7     5 
-          x"7E",x"25",x"37",x"35",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20" 
-   );
-   
-   
-   
-   
-   
-   
---==========================================================================================================================================================================================    
-   lcd_display_string_10 <= 
-    (
--- Line 1    B    a      t     t     e    r     y          L     e     v      e    l 
-          x"42",x"61",x"74",x"74",x"65",x"72",x"79",x"20",x"4C",x"65",x"76",x"65",x"6C",x"20",x"20",x"20",
-   
--- Line 2   ->     %    1     0      0
-          x"7E",x"25",x"31",x"30",x"30",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20" 
-   );
-   
-   
-   
-
-
-   
---==========================================================================================================================================================================================    
-   lcd_display_string_11 <= 
-    (
--- Line 1                     B    L      U     E     T     O     O     T     H
-          x"20",x"20",x"20",x"42",x"4C",x"55",x"45",x"54",x"4F",x"4F",x"54",x"48",x"20",x"20",x"20",x"20",
-   
--- Line 2                C     O     N    T      R     O     L    L     E      R
-          x"20",x"20",x"43",x"4F",x"4E",x"54",x"52",x"4F",x"4C",x"4C",x"45",x"52",x"20",x"20",x"0"&hex_display_data(7 downto 4),x"0"&hex_display_data(3 downto 0)
-   );
-   
-
-
+-- Bugged state message
+lcd_display_bugMessage <= (x"54",x"48",x"45",x"52",x"45",x"20",x"57",x"41",x"53",x"20",x"41",x"20",x"42",x"55",x"47",x"21",
+									x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20",x"20");
 
 -------------------------------------------------------------------------------------------------------
 -- BIDIRECTIONAL TRI STATE LCD DATA BUS
@@ -465,47 +654,47 @@ BEGIN
           
           -- Bluetooth Disconnected
        WHEN "0000" =>
-            next_char <= lcd_display_string_01(CONV_INTEGER(char_count));
+            next_char <= lcd_display_bugMessage(CONV_INTEGER(char_count));
                                                                           
           -- Bluetooth Connected                                                                                         
        WHEN "0001" =>      
-            next_char <= lcd_display_string_02(CONV_INTEGER(char_count));
+            next_char <= lcd_display_finalLoss(CONV_INTEGER(char_count));
             
             -- CHARGING %25
        WHEN "0010" =>      
-            next_char <= lcd_display_string_03(CONV_INTEGER(char_count));            
+            next_char <= lcd_display_finalWin(CONV_INTEGER(char_count));            
             
             -- CHARGING %50                                                           
        WHEN "0011" =>      
-            next_char <= lcd_display_string_04(CONV_INTEGER(char_count));                                                                                                                         
+            next_char <= lcd_display_levelPass(CONV_INTEGER(char_count));                                                                                                                         
         
             -- CHARGING %75
        WHEN "0100"  =>      
-            next_char <= lcd_display_string_05(CONV_INTEGER(char_count));
+            next_char <= lcd_display_levelFail(CONV_INTEGER(char_count));
                 
             -- CHARGING %100        
        WHEN "0101" =>
-           next_char <= lcd_display_string_06(CONV_INTEGER(char_count));
+           next_char <= lcd_display_convertocttobin(CONV_INTEGER(char_count));
               
             -- Battery Level %25                                                                                           
        WHEN "0110" =>      
-           next_char <= lcd_display_string_07(CONV_INTEGER(char_count));
+           next_char <= lcd_display_converthextobin(CONV_INTEGER(char_count));
             
            -- Battery Level %50   
        WHEN "0111" =>      
-           next_char <= lcd_display_string_08(CONV_INTEGER(char_count)); 
+           next_char <= lcd_display_convertdectobin(CONV_INTEGER(char_count)); 
                             
            -- Battery Level %75      
        WHEN "1000" =>      
-           next_char <= lcd_display_string_09(CONV_INTEGER(char_count));
+           next_char <= lcd_display_level30life1(CONV_INTEGER(char_count));
                    
            -- Battery Level %100  
        WHEN "1001" =>      
-           next_char <= lcd_display_string_10(CONV_INTEGER(char_count));         
+           next_char <= lcd_display_level1life1(CONV_INTEGER(char_count));         
                                                                                                                               
                  --  BLUETOOTH CONTROLLER                                                                 
             WHEN OTHERS =>              
-               next_char <= lcd_display_string_11(CONV_INTEGER(char_count));
+               next_char <= lcd_display_level20life1(CONV_INTEGER(char_count));
                                                      
        END CASE;
 END PROCESS;
