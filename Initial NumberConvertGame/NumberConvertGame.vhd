@@ -11,7 +11,8 @@ entity NumberConvertGame is
     LEDG0, LEDG1, LEDG2, LEDG3, LEDG4, LEDG5, LEDG6, LEDG7  : out std_logic; -- output green lights
 	 LEDR0, LEDR1, LEDR2, LEDR3, LEDR4, LEDR5, LEDR6, LEDR7, LEDR8, LEDR9, LEDR10  : out std_logic; -- output red lights
 	 LEDR11, LEDR12, LEDR13, LEDR14, LEDR15, LEDR16, LEDR17  : out std_logic; -- output red lights
-	 h7a, h7b, h7c, h7d, h7e, h7f, h7g, h6a, h6b, h6c, h6d, h6e, h6f, h6g : out std_logic); -- output level to hex
+	 h7a, h7b, h7c, h7d, h7e, h7f, h7g, h6a, h6b, h6c, h6d, h6e, h6f, h6g, h3a, h3b, h3c, h3d, h3e, h3f, h2a, h2b, h2c, h2d, h2e, h2f, h2g,
+	 h1a, h1b, h1c, h1d, h1e, h1f, h1g, h0a, h0b, h0c, h0d, h0e, h0f, h0g : out std_logic); -- output level to hex
 
 end NumberConvertGame;
 
@@ -45,8 +46,13 @@ begin  -- behavior
       case state is
 		
 			when L1 => 
-				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
-				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1'; -- displays on hex what the current level is
+				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1'; -- displays on hex what the current level is
+				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
+				--h3a <= '1'; h3b <= '0'; h3c <= '0'; h3d <= '1'; h3e <= '1'; h3f <= '1'; h3g <= '1'; -- displays value to be converted
+				--h2a <= '1'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				--h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
+				--h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
 				currentLevelFlag := 1;
 				lifeCounter := 3;  
 				if (enterGuess = '1') then
@@ -62,6 +68,7 @@ begin  -- behavior
 			when L2 => 
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '0'; h6e <= '0'; h6f <= '1'; h6g <= '0';
+				h0a <= '0'; h0b <= '1'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
 				currentLevelFlag := 2;
 				if (enterGuess = '1') then
 					-- Number base10 6
@@ -75,6 +82,8 @@ begin  -- behavior
 			
 			
 			when L3 => 
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';
 				currentLevelFlag := 3;
 				if (enterGuess = '1') then
 					-- Number base10 17
@@ -87,6 +96,8 @@ begin  -- behavior
 				end if;
 				
 			when L4 => 
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
+				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';
 				currentLevelFlag := 4;
 				if (enterGuess = '1') then
 					-- Number base10 86
@@ -99,6 +110,8 @@ begin  -- behavior
 				end if;
 			
 			when L5 => 
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
+				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';
 				currentLevelFlag := 5;
 				if (enterGuess = '1') then
 					-- Number base10 112
@@ -111,6 +124,8 @@ begin  -- behavior
 				end if;
 			
 			when L6 => 
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
+				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';
 				currentLevelFlag := 6;
 				if (enterGuess = '1') then
 					-- Number base10 341
@@ -123,6 +138,8 @@ begin  -- behavior
 				end if;
 				
 			when L7 => 
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
 				currentLevelFlag := 7;
 				if (enterGuess = '1') then
 					-- Number base10 891
@@ -135,6 +152,8 @@ begin  -- behavior
 				end if;			
 			
 			when L8 => 
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';
 				currentLevelFlag := 8;
 				if (enterGuess = '1') then
 					-- Number base10 2368
@@ -147,6 +166,8 @@ begin  -- behavior
 				end if;
 			
 			when L9 => 	
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';
 				currentLevelFlag := 9;
 				if (enterGuess = '1') then
 					-- Number base10 5450
@@ -158,7 +179,9 @@ begin  -- behavior
 					end if;
 				end if;
 			
-			when L10 => 	
+			when L10 => 
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '1';	
 				currentLevelFlag := 10;
 				if (enterGuess = '1') then
 					-- Number base10 8761
@@ -171,6 +194,8 @@ begin  -- behavior
 				end if;
 			
 			when L11 => 
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';	
 				currentLevelFlag := 11;
 				if (enterGuess = '1') then
 					-- Number base16 9
@@ -183,24 +208,233 @@ begin  -- behavior
 				end if;
 
 			when L12 => 
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '0'; h6e <= '0'; h6f <= '1'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base16 C
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '1' AND SW1 = '0' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L13 => 
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base16 32
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '0' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L14 => 
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base16 1A5
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L15 => 
-			when L16 => 
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base16 1F4
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='1' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
+			when L16 =>
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base16 FA2
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if; 
 			when L17 => 
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';	
+				if (enterGuess = '1') then
+					-- Number base16 3F8A
+					if (SW13 = '1' AND SW12 ='1' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L18 => 
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base16 2EAA					
+					if (SW13 = '1' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='0' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L19 => 
+				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base16 2F9A
+					if (SW13 = '1' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='0' AND SW4 ='1' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L20 => 
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '1';	
+				if (enterGuess = '1') then
+					-- Number base16 3FFF
+					if (SW13 = '1' AND SW12 ='1' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '1' AND SW1 = '1' AND SW0 = '1') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L21 => 
+			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+			h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
+				if (enterGuess = '1') then
+					-- Number base8 5
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L22 => 
+			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+			h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '0'; h6e <= '0'; h6f <= '1'; h6g <= '0';
+				if (enterGuess = '1') then
+					-- Number base6 11
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L23 =>
+			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base6 53
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '1') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L24 => 
+			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+			h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base8 113
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='1' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '1') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L25 => 
+			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+			h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base8 672
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L26 => 
-			when L27 => 
+			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+			h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base8 741					
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
+			when L27 =>
+			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
+				if (enterGuess = '1') then
+					-- Number base8 1076
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='1' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '1' AND SW1 = '1' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L28 => 
+			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				if (enterGuess = '1') then
+					-- Number base8 2745
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='1' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L29 => 
+			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+			if (enterGuess = '1') then
+					-- Number base8 6724
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='0' AND SW4 ='1' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			when L30 => 
+			h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '1'; h7f <= '1'; h7g <= '0';
+			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '1';	
+				if (enterGuess = '1') then
+					-- Number base8 7712
+					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
+						-- correct guess
+						state <= CorrectState;
+					else
+						state <= FailState;
+					end if;
+				end if;
 			
 			when FailState =>
 				if (lifeCounter = 3) then 
@@ -235,13 +469,14 @@ begin  -- behavior
 				LEDR16 <= REDLIGHT_CONTROLLER;
 				LEDR17 <= REDLIGHT_CONTROLLER;
 				
-				if (currentLevelFlag = 1) then
-					state <= L1;
-				elsif (currentLevelFlag = 2) then
-					state <= L2;
-				elsif (currentLevelFlag = 3) then
-					state <= L3;
-				elsif (currentLevelFlag = 4) then
+				if (delay5sIsOver) then
+					if (currentLevelFlag = 1) then
+						state <= L1;
+					elsif (currentLevelFlag = 2) then
+						state <= L2;
+					elsif (currentLevelFlag = 3) then
+						state <= L3;
+					elsif (currentLevelFlag = 4) then
 					state <= L4;
 				elsif (currentLevelFlag = 5) then
 					state <= L5;
@@ -295,7 +530,8 @@ begin  -- behavior
 					state <= L29;
 				elsif (currentLevelFlag = 30) then
 					state <= L30;
-				end if;				
+				end if;
+				end if;			
 			
 			when CorrectState =>
 				-- Flash green lights

@@ -111,4 +111,11 @@ set_location_assignment PIN_AF17 -to h7e
 set_location_assignment PIN_AG18 -to h7f
 set_location_assignment PIN_AA14 -to h7g
 set_location_assignment PIN_AA17 -to h6a
+set_location_assignment PIN_F22 -to h0b
+set_location_assignment PIN_E17 -to h0c
+set_location_assignment PIN_L26 -to h0d
+set_location_assignment PIN_L25 -to h0e
+set_location_assignment PIN_J22 -to h0f
+set_location_assignment PIN_H22 -to h0g
+set_location_assignment PIN_G18 -to h0a
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
