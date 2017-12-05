@@ -7,7 +7,7 @@
 -- ECE 287 Final Project
 
 
-LIBRARY IEEE;
+~~LIBRARY IEEE;
 USE  IEEE.STD_LOGIC_1164.all;
 USE  IEEE.STD_LOGIC_ARITH.all;
 USE  IEEE.STD_LOGIC_UNSIGNED.all;
@@ -45,7 +45,7 @@ ENTITY Binverter IS
       Hex_Display_Data_4 : IN     STD_LOGIC;
       Hex_Display_Data_5 : IN     STD_LOGIC;
       Hex_Display_Data_6 : IN     STD_LOGIC;
-      Hex_Display_Data_7 : IN     STD_LOGIC;
+      Hex_Display_Data_7 : IN     STD_LOGIC;~~
 		
 		resetSW16 : in  std_logic;  -- control the reset of the game to reset level
 		skipToLevel11, skipToLevel21, skipToLevel30, skipToFinalLoss : in std_logic;  -- buttons to act as asynchronous resets to test different features in the FSM
@@ -54,14 +54,14 @@ ENTITY Binverter IS
 		LEDR0, LEDR1, LEDR2, LEDR3, LEDR4, LEDR5, LEDR6, LEDR7, LEDR8, LEDR9, LEDR10  : out std_logic; -- output red lights
 		LEDR11, LEDR12, LEDR13, LEDR14, LEDR15, LEDR16, LEDR17  : out std_logic -- output red lights
       
-   );
+  ~~ );
 
 END Binverter;
 
 
 ARCHITECTURE Binverter_arch OF Binverter IS
 
-	type character_string is array ( 0 to 31 ) of STD_LOGIC_VECTOR( 7 downto 0 );
+	type character_string is array ( 0 to 31 ) of STD_LOGIC_VECTOR( 7 downto 0 );~~
 	
 	type game_type is (BuggedState, ResetState, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L13, L14, L15, L16, L17, L18, L19, L20, L21, L22, L23, L24, L25, L26, L27, L28, L29, L30, FailIntermediate, FailState, CorrectState, FinalWin, FinalLoss);  -- enumeration to hold our states
 	
@@ -185,7 +185,7 @@ ARCHITECTURE Binverter_arch OF Binverter IS
 	signal lcd_display_bugMessage		 : character_string;
 	signal lcd_display_resetMessage	 : character_string;
   
-	type state_type is (hold, func_set, display_on, mode_set, print_string,
+	~~type state_type is (hold, func_set, display_on, mode_set, print_string,
                       line2, return_home, drop_lcd_e, reset1, reset2,
                        reset3, display_off, display_clear);
                        
@@ -225,7 +225,7 @@ data_bus_3 <= data_bus(3);
 data_bus_4 <= data_bus(4);
 data_bus_5 <= data_bus(5);
 data_bus_6 <= data_bus(6);
-data_bus_7 <= data_bus(7);
+data_bus_7 <= data_bus(7);~~
 
 
  
@@ -528,12 +528,12 @@ lcd_display_bugMessage <= (x"54",x"48",x"45",x"52",x"45",x"20",x"57",x"41",x"53"
 lcd_display_resetMessage <= (x"52",x"65",x"73",x"65",x"74",x"74",x"69",x"6E",x"67",x"2E",x"2E",x"2E",x"20",x"20",x"20",x"20",
 									  x"53",x"57",x"31",x"35",x"20",x"74",x"6F",x"20",x"62",x"65",x"67",x"69",x"6E",x"20",x"20",x"20");
 
--------------------------------------------------------------------------------------------------------
+~~-------------------------------------------------------------------------------------------------------
 -- BIDIRECTIONAL TRI STATE LCD DATA BUS
-   data_bus <= data_bus_value when lcd_rw_int = '0' else "ZZZZZZZZ";
+ data_bus <= data_bus_value when lcd_rw_int = '0' else "ZZZZZZZZ";
    
 -- LCD_RW PORT is assigned to it matching SIGNAL 
- lcd_rw <= lcd_rw_int;
+ lcd_rw <= lcd_rw_int;~~
  
 
 --------------------------- STATE MACHINE FOR Game playing and LCD message select -----------------------------
@@ -1611,7 +1611,7 @@ END PROCESS;
  
   
   
---=====================================================================-- 
+~~--=====================================================================-- 
 --======================= CLOCK #1 SIGNALS ============================--  
 --=====================================================================-- 
 process(clock_50)
@@ -1849,5 +1849,5 @@ begin
       
 end process;                                                            
   
-END ARCHITECTURE Binverter_arch;
+END ARCHITECTURE Binverter_arch;~~
 
