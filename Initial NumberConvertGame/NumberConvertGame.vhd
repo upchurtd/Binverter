@@ -7,7 +7,7 @@ entity NumberConvertGame is
   
   port (
     clk, resetSW17 : in  std_logic;  -- clock
-    SW0, SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8, SW9, SW10, SW11, SW12, SW13, enterGuess   : in  std_logic; 
+    SW0, SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8, SW9, SW10, SW11, SW12, SW13, enterGuess, startGame  : in  std_logic; 
     LEDG0, LEDG1, LEDG2, LEDG3, LEDG4, LEDG5, LEDG6, LEDG7  : out std_logic; -- output green lights
 	 LEDR0, LEDR1, LEDR2, LEDR3, LEDR4, LEDR5, LEDR6, LEDR7, LEDR8, LEDR9, LEDR10  : out std_logic; -- output red lights
 	 LEDR11, LEDR12, LEDR13, LEDR14, LEDR15, LEDR16, LEDR17  : out std_logic; -- output red lights
@@ -19,8 +19,8 @@ end NumberConvertGame;
 
 architecture behavior of NumberConvertGame is
 
-	type state_type is (BuggedState, FailIntermediate, CorrectIntermediate, ResetState, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L13, L14, L15, L16, L17, L18, L19, L20, L21, L22, L23, L24, L25, L26, L27, L28, L29, L30, FailState, CorrectState, FinalWin, FinalLoss);  -- enumeration to hold our states
-	signal state : state_type := L1;
+	type state_type is (BuggedState, ResetState, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L13, L14, L15, L16, L17, L18, L19, L20, L21, L22, L23, L24, L25, L26, L27, L28, L29, L30, FailIntermediate, FailState, CorrectState, FinalWin, FinalLoss);  -- enumeration to hold our states
+	signal state : state_type := ResetState;
 	
 	shared variable lifeCounter : natural range 0 to 255;
 	shared variable currentLevelFlag : natural range 0 to 255;
@@ -37,10 +37,13 @@ architecture behavior of NumberConvertGame is
 	shared variable guessEntered : boolean := false;
 	
 begin  -- behavior  
-	gameProcess: process (clk, resetSW17)
+	process (clk, resetSW17, SW0, SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8, SW9, SW10, SW11, SW12, SW13, enterGuess, startGame)
 	begin  -- process gameProcess
 	
-		if clk'event and clk = '1' then  -- rising clock edge
+		if resetSW17 = '1' then   -- asynchronous reset
+			state <= ResetState;
+		elsif clk'event and clk = '1' then  -- rising clock edge
+		
 			if redLightCounter < "1011111010111100001000000" then
 				redLightCounter <= redLightCounter + 8;
 				greenLightCounter <= greenLightCounter + 8;
@@ -50,10 +53,12 @@ begin  -- behavior
 				redLightCounter <= (others => '0');
 				greenLightCounter <= (others => '0');
 			end if;
-			
-         if counter < "1011111010111100001000000" then
+		
+			if counter < "1011111010111100001000000" then
 				counter <= counter + 1;
 			else 
+				REDLIGHT_CONTROLLER <= not REDLIGHT_CONTROLLER;
+				GREENLIGHT_CONTROLLER <= not GREENLIGHT_CONTROLLER;
 				delay_3s <= delay_3s + 1;
 				delay_10s <= delay_10s + 1;
 				counter <= (others => '0');
@@ -78,12 +83,6 @@ begin  -- behavior
 					delay_10s <= (others => '0');
 				end if;				
 			end if;
-			
-		end if;
-	
-		if resetSW17 = '1' then   -- asynchronous reset
-			state <= ResetState;
-		elsif clk'event and clk = '1' then  -- rising clock edge
 		
       case state is
 		
@@ -98,27 +97,29 @@ begin  -- behavior
 				h0a <= '0'; h0b <= '1'; h0c <= '1'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted				
 				
 			when ResetState =>
-				-- Reset the hexes
-				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
-				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '0'; h6f <= '0'; h6g <= '0'; -- displays on hex what the current level is
-				h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '1'; h5e <= '0'; h5f <= '0'; h5g <= '0'; -- displays the number of lives left
-				h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '0'; h4f <= '0'; h4g <= '0'; -- displays the number of lives left				
-				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '1'; h3e <= '0'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
-				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
-				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
-				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				if (startGame = '1') then
+					state <= L1;
+				else 
+					-- Reset the hexes
+					h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
+					h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '0'; h6f <= '0'; h6g <= '0'; -- displays on hex what the current level is
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '1'; h5e <= '0'; h5f <= '0'; h5g <= '0'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '0'; h4f <= '0'; h4g <= '0'; -- displays the number of lives left				
+					h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '1'; h3e <= '0'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
+					h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+					h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+					h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
 			
-				-- Turn off all the lights
-				LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
-				LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
-				LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
+					-- Turn off all the lights
+					LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
+					LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
+					LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
 				
-				guessEntered := false;
+					guessEntered := false;
 				
-				lifeCounter := 3;
-				currentLevelFlag := 1;
-				
-				state <= L1;
+					lifeCounter := 3;
+					currentLevelFlag := 1;
+				end if;
 		
 			when L1 => 
 				currentLevelFlag := 1;
@@ -857,6 +858,11 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
+				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
 					guessEntered := true;
 					-- Number base6 11
@@ -885,6 +891,11 @@ begin  -- behavior
 				else 
 					state <= BuggedState;
 				end if;
+				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '1'; h1c <= '0'; h1d <= '0'; h1e <= '1'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '1'; h0f <= '1'; h0g <= '0'; -- displays value to be converted
 				
 				if (enterGuess = '1') then
 					guessEntered := true;
@@ -915,6 +926,11 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '1'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '1'; h0f <= '1'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
 					guessEntered := true;
 					-- Number base8 113
@@ -944,6 +960,11 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '1'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '1'; h0d <= '0'; h0e <= '0'; h0f <= '1'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
 					guessEntered := true;
 					-- Number base8 672
@@ -972,6 +993,11 @@ begin  -- behavior
 				else 
 					state <= BuggedState;
 				end if;
+				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
 				
 				if (enterGuess = '1') then
 					guessEntered := true;
@@ -1317,7 +1343,18 @@ begin  -- behavior
 			
 			when FinalWin =>
 				if (lifeCounter = 3) then
-					-- print out some cool message here
+					-- print out some cool message here instead of the code below
+					h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
+					h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0'; -- displays on hex what the current level is
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '0'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '0'; h4f <= '0'; h4g <= '0'; -- displays the number of lives left		
+					h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
+					h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+					h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+					h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+					-- turn on the green lights
+					LEDG0 <= '1'; LEDG1 <= '1'; LEDG2 <= '1'; LEDG3 <= '1'; LEDG4 <= '1'; LEDG5 <= '1'; LEDG6 <= '1'; LEDG7 <= '1';
+			
 				end if;
 			
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
@@ -1330,8 +1367,6 @@ begin  -- behavior
 				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
 				-- turn on the green lights
 				LEDG0 <= '1'; LEDG1 <= '1'; LEDG2 <= '1'; LEDG3 <= '1'; LEDG4 <= '1'; LEDG5 <= '1'; LEDG6 <= '1'; LEDG7 <= '1';
-				
-				--state <= ResetState;
 			
 			when FinalLoss =>
 				h7a <= '1'; h7b <= '1'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
@@ -1345,18 +1380,15 @@ begin  -- behavior
 				-- turn on the red lights
 				LEDR0 <= '1'; LEDR1 <= '1'; LEDR2 <= '1'; LEDR3 <= '1'; LEDR4 <= '1'; LEDR5 <= '1'; LEDR6 <= '1'; LEDR7 <= '1'; LEDR8 <= '1'; LEDR9 <= '1';
 				LEDR10 <= '1'; LEDR11 <= '1'; LEDR12 <= '1'; LEDR13 <= '1'; LEDR14 <= '1'; LEDR15 <= '1'; LEDR16 <= '1'; LEDR17 <= '1';
-				
-				--state <= ResetState;
 			
-			when others => state <= BuggedState;
-		
-	--	=> null;
+			when others =>
+				state <= ResetState;
 			
 			end case;
 			
 		end if;
 			
-	end process gameProcess;
+	end process;
 	
 end behavior;		
 			
