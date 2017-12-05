@@ -19,22 +19,23 @@ end NumberConvertGame;
 
 architecture behavior of NumberConvertGame is
 
-	type state_type is (ResetState, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L13, L14, L15, L16, L17, L18, L19, L20, L21, L22, L23, L24, L25, L26, L27, L28, L29, L30, FailState, CorrectState, FinalWin, FinalLoss);  -- enumeration to hold our states
+	type state_type is (BuggedState, FailIntermediate, CorrectIntermediate, ResetState, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L13, L14, L15, L16, L17, L18, L19, L20, L21, L22, L23, L24, L25, L26, L27, L28, L29, L30, FailState, CorrectState, FinalWin, FinalLoss);  -- enumeration to hold our states
 	signal state : state_type := L1;
 	
 	shared variable lifeCounter : natural range 0 to 255;
 	shared variable currentLevelFlag : natural range 0 to 255;
 	
 	signal counter : std_logic_vector(25 downto 0);  			 -- signal that does the counting for 1 second
-	signal redLightCounter : std_logic_vector(10 downto 0); 	 -- signal that does the counting for 1 second
-	signal greenLightCounter : std_logic_vector(10 downto 0); 	 -- signal that does the counting for 1 second
-	shared variable delay5sIsOver : boolean := false;			 -- delay program for 5s on Success State
+	signal redLightCounter : std_logic_vector(25 downto 0); 	 -- signal that does the counting for 1 second
+	signal greenLightCounter : std_logic_vector(25 downto 0); 	 -- signal that does the counting for 1 second
+	shared variable delay3sIsOver : boolean := false;			 -- delay program for 5s on Success State
 	shared variable delay10sIsOver : boolean := false;			 -- delay program for 10s on Fail State
-	signal delay_5s : std_logic_vector(5 downto 0); 		 	 -- signal to control delay for Correct State
+	signal delay_3s : std_logic_vector(5 downto 0); 		 	 -- signal to control delay for Correct State
 	signal delay_10s : std_logic_vector(10 downto 0); 			 -- signal to control delays for Fail State
 	signal REDLIGHT_CONTROLLER : std_logic;     					 -- to drive the LED for red light blinking
 	signal GREENLIGHT_CONTROLLER : std_logic;     				 -- to drive the LED for green light blinking
 	shared variable blinkFlag : boolean := false; 				 -- boolean flag to blink green light or red light
+	shared variable guessEntered : boolean := false;
 	
 begin  -- behavior  
 	gameProcess: process (clk, resetSW17)
@@ -45,9 +46,29 @@ begin  -- behavior
 		elsif clk'event and clk = '1' then  -- rising clock edge
 		
       case state is
+		
+			when BuggedState => 
+				h7a <= '0'; h7b <= '1'; h7c <= '1'; h7d <= '1'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
+				h6a <= '0'; h6b <= '1'; h6c <= '1'; h6d <= '1'; h6e <= '0'; h6f <= '0'; h6g <= '0'; -- displays on hex what the current level is
+				h5a <= '0'; h5b <= '1'; h5c <= '1'; h5d <= '1'; h5e <= '0'; h5f <= '0'; h5g <= '0'; -- displays the number of lives left
+				h4a <= '0'; h4b <= '1'; h4c <= '1'; h4d <= '1'; h4e <= '0'; h4f <= '0'; h4g <= '0'; -- displays the number of lives left				
+				h3a <= '0'; h3b <= '1'; h3c <= '1'; h3d <= '1'; h3e <= '0'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '1'; h2c <= '1'; h2d <= '1'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '1'; h1c <= '1'; h1d <= '1'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '1'; h0c <= '1'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted				
 				
 			when ResetState =>
+				-- Turn off all the lights
+				LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
+				LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
+				LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
+				
+				GREENLIGHT_CONTROLLER <= '0';
+				REDLIGHT_CONTROLLER <= '0';
+				guessEntered := false;
+				
 				lifeCounter := 3;
+				
 				state <= L1;
 		
 			when L1 => 
@@ -65,114 +86,256 @@ begin  -- behavior
 				elsif (lifeCounter = 1) then
 					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
 					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
-				else
-					state <= FinalLoss;
+				else 
+					state <= BuggedState;
 				end if;				
 				
-				h3a <= '1'; h3b <= '0'; h3c <= '0'; h3d <= '1'; h3e <= '1'; h3f <= '1'; h3g <= '1'; -- displays value to be converted
-				h2a <= '1'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
-				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '1'; -- displays value to be converted
 				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
 				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 1
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '0' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 			
 			when L2 => 
+				currentLevelFlag := 2;
+			
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '0'; h6e <= '0'; h6f <= '1'; h6g <= '0';
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;	
+				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '1'; -- displays value to be converted
 				h0a <= '0'; h0b <= '1'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
-				currentLevelFlag := 2;
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 6
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 			
 			
 			when L3 => 
+				currentLevelFlag := 3;
+				
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';
-				currentLevelFlag := 3;
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;	
+				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 17
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='1' AND SW3 = '0' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 				
 			when L4 => 
+				currentLevelFlag := 4;
+				
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';
-				currentLevelFlag := 4;
+			
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;	
+			
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '1'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 86
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='1' AND SW5 ='0' AND SW4 ='1' AND SW3 = '0' AND SW2 = '1' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 			
 			when L5 => 
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;	
+				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '1'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '1'; h0d <= '0'; h0e <= '0'; h0f <= '1'; h0g <= '0'; -- displays value to be converted
+				
 				currentLevelFlag := 5;
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 112
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='1' AND SW5 ='1' AND SW4 ='1' AND SW3 = '0' AND SW2 = '0' AND SW1 = '0' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 			
 			when L6 => 
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;	
+				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '1'; h2f <= '1'; h2g <= '0'; -- displays value to be converted
+				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
+				
 				currentLevelFlag := 6;
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 341
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='0' AND SW6 ='1' AND SW5 ='0' AND SW4 ='1' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 				
 			when L7 => 
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;	
+				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
+				
 				currentLevelFlag := 7;
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 891
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='1' AND SW8 ='1' AND SW7 ='0' AND SW6 ='1' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;			
 			
 			when L8 => 
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;	
+				
+				h3a <= '0'; h3b <= '0'; h3c <= '1'; h3d <= '0'; h3e <= '0'; h3f <= '1'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '1'; h2f <= '1'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '1'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				currentLevelFlag := 8;
 				if (enterGuess = '1') then
 					-- Number base10 2368
@@ -180,41 +343,93 @@ begin  -- behavior
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 			
-			when L9 => 	
+			when L9 => 		
+				currentLevelFlag := 9;			
+				
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';
-				currentLevelFlag := 9;
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;	
+				
+				h3a <= '0'; h3b <= '1'; h3c <= '0'; h3d <= '0'; h3e <= '1'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
+				h2a <= '1'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '1'; h1c <= '0'; h1d <= '0'; h1e <= '1'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '1'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
 					-- Number base10 5450
 					if (SW13 = '0' AND SW12 ='1' AND SW11 ='0' AND SW10 ='1' AND SW9 ='0' AND SW8 ='1' AND SW7 ='0' AND SW6 ='1' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 			
 			when L10 => 
+				currentLevelFlag := 10;
+			
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '1';	
-				currentLevelFlag := 10;
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;	
+				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '1'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
 					-- Number base10 8761
 					if (SW13 = '1' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='1' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 			
 			when L11 => 
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				end if;
+				
 				currentLevelFlag := 11;
 				if (enterGuess = '1') then
 					-- Number base16 9
@@ -222,246 +437,540 @@ begin  -- behavior
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
 
 			when L12 => 
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '0'; h6e <= '0'; h6f <= '1'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base16 C
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '1' AND SW1 = '0' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L13 => 
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
-				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';	
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';
+			
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base16 32
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '0' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L14 => 
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base16 1A5
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L15 => 
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base16 1F4
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='1' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L16 =>
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base16 FA2
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if; 
+				
 			when L17 => 
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base16 3F8A
 					if (SW13 = '1' AND SW12 ='1' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L18 => 
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base16 2EAA					
 					if (SW13 = '1' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='0' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L19 => 
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
-				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';
+			
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base16 2F9A
 					if (SW13 = '1' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='0' AND SW4 ='1' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L20 => 
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '1';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base16 3FFF
 					if (SW13 = '1' AND SW12 ='1' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '1' AND SW1 = '1' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L21 => 
-			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-			h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base8 5
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L22 => 
-			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-			h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '0'; h6e <= '0'; h6f <= '1'; h6g <= '0';
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '0'; h6e <= '0'; h6f <= '1'; h6g <= '0';
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base6 11
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L23 =>
-			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';	
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base6 53
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L24 => 
-			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-			h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base8 113
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='1' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L25 => 
-			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-			h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';
+			
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base8 672
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L26 => 
-			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-			h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base8 741					
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L27 =>
-			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base8 1076
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='1' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '1' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L28 => 
-			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base8 2745
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='1' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L29 => 
-			h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
-			if (enterGuess = '1') then
+				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
+				if (enterGuess = '1') then
 					-- Number base8 6724
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='0' AND SW4 ='1' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
+				
 			when L30 => 
-			h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '1'; h7f <= '1'; h7g <= '0';
-			h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '1';	
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '1'; h7f <= '1'; h7g <= '0';
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '1';	
+				
+				if (lifeCounter = 3) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '1'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 2) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '0'; h4b <= '0'; h4c <= '1'; h4d <= '0'; h4e <= '0'; h4f <= '1'; h4g <= '0'; -- displays the number of lives left
+				elsif (lifeCounter = 1) then
+					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
+					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
+				else 
+					state <= BuggedState;
+				end if;
+				
 				if (enterGuess = '1') then
 					-- Number base8 7712
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
 						state <= CorrectState;
 					else
-						state <= FailState;
+						state <= FailIntermediate;
 					end if;
 				end if;
-			
-			when FailState =>
-				if (lifeCounter = 3) then 
+
+			when FailIntermediate =>
+				if (lifeCounter > 3) then
+					lifeCounter := 2;
+				elsif (lifeCounter = 3) then
 					lifeCounter := 2;
 				elsif (lifeCounter = 2) then
 					lifeCounter := 1;
 				elsif (lifeCounter = 1) then
 					lifeCounter := 0;
+				else
+					lifeCounter := 0;
+				end if;
+				
+				state <= FailState;
+			
+			when FailState =>
+				if (lifeCounter = 0) then
 					state <= FinalLoss;
 				end if;
 				
@@ -489,6 +998,12 @@ begin  -- behavior
 				LEDR17 <= REDLIGHT_CONTROLLER;
 				
 				if (delay10sIsOver) then
+					guessEntered := false;
+					-- Turn off all the lights
+					LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
+					LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
+					LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
+					
 					if (currentLevelFlag = 1) then
 						state <= L1;
 					elsif (currentLevelFlag = 2) then
@@ -566,71 +1081,97 @@ begin  -- behavior
 				LEDG6 <= GREENLIGHT_CONTROLLER;
 				LEDG7 <= GREENLIGHT_CONTROLLER;
 				
-				if (currentLevelFlag = 1) then
-					state <= L2;
-				elsif (currentLevelFlag = 2) then
-					state <= L3;
-				elsif (currentLevelFlag = 3) then
-					state <= L4;
-				elsif (currentLevelFlag = 4) then
-					state <= L5;
-				elsif (currentLevelFlag = 5) then
-					state <= L6;
-				elsif (currentLevelFlag = 6) then
-					state <= L7;
-				elsif (currentLevelFlag = 7) then
-					state <= L8;
-				elsif (currentLevelFlag = 8) then
-					state <= L9;
-				elsif (currentLevelFlag = 9) then
-					state <= L10;
-				elsif (currentLevelFlag = 10) then
-					state <= L11;
-				elsif (currentLevelFlag = 11) then
-					state <= L12;
-				elsif (currentLevelFlag = 12) then
-					state <= L13;
-				elsif (currentLevelFlag = 13) then
-					state <= L14;
-				elsif (currentLevelFlag = 14) then
-					state <= L15;
-				elsif (currentLevelFlag = 15) then
-					state <= L16;
-				elsif (currentLevelFlag = 16) then
-					state <= L17;
-				elsif (currentLevelFlag = 17) then
-					state <= L18;
-				elsif (currentLevelFlag = 18) then
-					state <= L19;
-				elsif (currentLevelFlag = 19) then
-					state <= L20;
-				elsif (currentLevelFlag = 20) then
-					state <= L21;
-				elsif (currentLevelFlag = 21) then
-					state <= L22;
-				elsif (currentLevelFlag = 22) then
-					state <= L23;
-				elsif (currentLevelFlag = 23) then
-					state <= L24;
-				elsif (currentLevelFlag = 24) then
-					state <= L25;
-				elsif (currentLevelFlag = 25) then
-					state <= L26;
-				elsif (currentLevelFlag = 26) then
-					state <= L27;
-				elsif (currentLevelFlag = 27) then
-					state <= L28;
-				elsif (currentLevelFlag = 28) then
-					state <= L29;
-				elsif (currentLevelFlag = 29) then
-					state <= L30;
-				elsif (currentLevelFlag = 30) then
-					state <= FinalWin;
+				if (delay3sIsOver) then
+					guessEntered := false;
+					-- Turn off all the lights
+					LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
+					LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
+					LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
+					
+					if (currentLevelFlag = 1) then
+						state <= L2;
+					elsif (currentLevelFlag = 2) then
+						state <= L3;
+					elsif (currentLevelFlag = 3) then
+						state <= L4;
+					elsif (currentLevelFlag = 4) then
+						state <= L5;
+					elsif (currentLevelFlag = 5) then
+						state <= L6;
+					elsif (currentLevelFlag = 6) then
+						state <= L7;
+					elsif (currentLevelFlag = 7) then
+						state <= L8;
+					elsif (currentLevelFlag = 8) then
+						state <= L9;
+					elsif (currentLevelFlag = 9) then
+						state <= L10;
+					elsif (currentLevelFlag = 10) then
+						state <= L11;
+					elsif (currentLevelFlag = 11) then
+						state <= L12;
+					elsif (currentLevelFlag = 12) then
+						state <= L13;
+					elsif (currentLevelFlag = 13) then
+						state <= L14;
+					elsif (currentLevelFlag = 14) then
+						state <= L15;
+					elsif (currentLevelFlag = 15) then
+						state <= L16;
+					elsif (currentLevelFlag = 16) then
+						state <= L17;
+					elsif (currentLevelFlag = 17) then
+						state <= L18;
+					elsif (currentLevelFlag = 18) then
+						state <= L19;
+					elsif (currentLevelFlag = 19) then
+						state <= L20;
+					elsif (currentLevelFlag = 20) then
+						state <= L21;
+					elsif (currentLevelFlag = 21) then
+						state <= L22;
+					elsif (currentLevelFlag = 22) then
+						state <= L23;
+					elsif (currentLevelFlag = 23) then
+						state <= L24;
+					elsif (currentLevelFlag = 24) then
+						state <= L25;
+					elsif (currentLevelFlag = 25) then
+						state <= L26;
+					elsif (currentLevelFlag = 26) then
+						state <= L27;
+					elsif (currentLevelFlag = 27) then
+						state <= L28;
+					elsif (currentLevelFlag = 28) then
+						state <= L29;
+					elsif (currentLevelFlag = 29) then
+						state <= L30;
+					elsif (currentLevelFlag = 30) then
+						state <= FinalWin;
+					end if;
 				end if;
 			
 			when FinalWin =>
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0'; -- displays on hex what the current level is
+				h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '0'; -- displays the number of lives left
+				h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '0'; h4e <= '0'; h4f <= '0'; h4g <= '0'; -- displays the number of lives left		
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				--state <= ResetState;
 			
 			when FinalLoss =>
+				h7a <= '1'; h7b <= '1'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
+				h6a <= '1'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0'; -- displays on hex what the current level is
+				h5a <= '1'; h5b <= '1'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '0'; -- displays the number of lives left
+				h4a <= '1'; h4b <= '1'; h4c <= '0'; h4d <= '0'; h4e <= '0'; h4f <= '0'; h4g <= '0'; -- displays the number of lives left		
+				h3a <= '1'; h3b <= '1'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
+				h2a <= '1'; h2b <= '1'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '1'; h1b <= '1'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '1'; h0b <= '1'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				--state <= ResetState;
 			
 			when others => null;
 			
@@ -642,6 +1183,13 @@ begin  -- behavior
 
 	updateCounter : process (clk) is
 	begin
+		--if resetSW17 = '1' then   -- asynchronous reset
+		--	counter <= (others => '0');
+		--	redLightCounter <= (others => '0');
+		--	greenLightCounter <= (others => '0');
+		--	delay_3s <= (others => '0');
+		--	delay_10s <= (others => '0');
+		--elsif clk'event and clk = '1' then
 		if clk'event and clk = '1' then
 			if redLightCounter < "1011111010111100001000000" then
 				redLightCounter <= redLightCounter + 8;
@@ -655,14 +1203,14 @@ begin  -- behavior
          if counter < "1011111010111100001000000" then
 				counter <= counter + 1;
 			else 
-				delay_5s <= delay_5s + 1;
+				delay_3s <= delay_3s + 1;
 				delay_10s <= delay_10s + 1;
 				counter <= (others => '0');
 				
-				-- 5s
-				if (delay_5s = 5) then
-					delay5sIsOver := true;
-					delay_5s <= (others => '0');
+				-- 3s
+				if (delay_3s = 3) then
+					delay3sIsOver := true;
+					delay_3s <= (others => '0');
 				end if;
 				
 				-- 10s
@@ -672,10 +1220,12 @@ begin  -- behavior
 				end if;
 				
 				-- Reset these when they are not in use
-				--if (enterGuess = '0') then
-				--	delay_5s <= (others => '0');
-				--	delay_10s <= (others => '0');
-				--end if;				
+				if (guessEntered = false) then
+					delay3sIsOver := false;
+					delay10sIsOver := false;
+					delay_3s <= (others => '0');
+					delay_10s <= (others => '0');
+				end if;				
 			end if;
 			
 		end if;
