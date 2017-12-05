@@ -25,21 +25,61 @@ architecture behavior of NumberConvertGame is
 	shared variable lifeCounter : natural range 0 to 255;
 	shared variable currentLevelFlag : natural range 0 to 255;
 	
-	signal counter : std_logic_vector(25 downto 0);  			 -- signal that does the counting for 1 second
-	signal redLightCounter : std_logic_vector(25 downto 0); 	 -- signal that does the counting for 1 second
-	signal greenLightCounter : std_logic_vector(25 downto 0); 	 -- signal that does the counting for 1 second
+	signal counter : std_logic_vector(24 downto 0);  			 -- signal that does the counting for 1 second
+	signal redLightCounter : std_logic_vector(24 downto 0); 	 -- signal that does the counting for 1 second
+	signal greenLightCounter : std_logic_vector(24 downto 0); 	 -- signal that does the counting for 1 second
 	shared variable delay3sIsOver : boolean := false;			 -- delay program for 5s on Success State
 	shared variable delay10sIsOver : boolean := false;			 -- delay program for 10s on Fail State
 	signal delay_3s : std_logic_vector(5 downto 0); 		 	 -- signal to control delay for Correct State
 	signal delay_10s : std_logic_vector(10 downto 0); 			 -- signal to control delays for Fail State
 	signal REDLIGHT_CONTROLLER : std_logic;     					 -- to drive the LED for red light blinking
 	signal GREENLIGHT_CONTROLLER : std_logic;     				 -- to drive the LED for green light blinking
-	shared variable blinkFlag : boolean := false; 				 -- boolean flag to blink green light or red light
 	shared variable guessEntered : boolean := false;
 	
 begin  -- behavior  
 	gameProcess: process (clk, resetSW17)
 	begin  -- process gameProcess
+	
+		if clk'event and clk = '1' then  -- rising clock edge
+			if redLightCounter < "1011111010111100001000000" then
+				redLightCounter <= redLightCounter + 8;
+				greenLightCounter <= greenLightCounter + 8;
+			else
+				REDLIGHT_CONTROLLER <= not REDLIGHT_CONTROLLER;
+				GREENLIGHT_CONTROLLER <= not GREENLIGHT_CONTROLLER;
+				redLightCounter <= (others => '0');
+				greenLightCounter <= (others => '0');
+			end if;
+			
+         if counter < "1011111010111100001000000" then
+				counter <= counter + 1;
+			else 
+				delay_3s <= delay_3s + 1;
+				delay_10s <= delay_10s + 1;
+				counter <= (others => '0');
+				
+				-- 3s
+				if (delay_3s = 3) then
+					delay3sIsOver := true;
+					delay_3s <= (others => '0');
+				end if;
+				
+				-- 10s
+				if (delay_10s = 10) then
+					delay10sIsOver := true;
+					delay_10s <= (others => '0');
+				end if;
+				
+				-- Reset these when they are not in use
+				if (guessEntered = false) then
+					delay3sIsOver := false;
+					delay10sIsOver := false;
+					delay_3s <= (others => '0');
+					delay_10s <= (others => '0');
+				end if;				
+			end if;
+			
+		end if;
 	
 		if resetSW17 = '1' then   -- asynchronous reset
 			state <= ResetState;
@@ -58,16 +98,25 @@ begin  -- behavior
 				h0a <= '0'; h0b <= '1'; h0c <= '1'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted				
 				
 			when ResetState =>
+				-- Reset the hexes
+				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
+				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '0'; h6f <= '0'; h6g <= '0'; -- displays on hex what the current level is
+				h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '1'; h5e <= '0'; h5f <= '0'; h5g <= '0'; -- displays the number of lives left
+				h4a <= '0'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '0'; h4f <= '0'; h4g <= '0'; -- displays the number of lives left				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '1'; h3e <= '0'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+			
 				-- Turn off all the lights
 				LEDR0 <= '0'; LEDR1 <= '0'; LEDR2 <= '0'; LEDR3 <= '0'; LEDR4 <= '0'; LEDR5 <= '0'; LEDR6 <= '0'; LEDR7 <= '0'; LEDR8 <= '0'; LEDR9 <= '0';
 				LEDR10 <= '0'; LEDR11 <= '0'; LEDR12 <= '0'; LEDR13 <= '0'; LEDR14 <= '0'; LEDR15 <= '0'; LEDR16 <= '0'; LEDR17 <= '0';
 				LEDG0 <= '0'; LEDG1 <= '0'; LEDG2 <= '0'; LEDG3 <= '0'; LEDG4 <= '0'; LEDG5 <= '0'; LEDG6 <= '0'; LEDG7 <= '0';
 				
-				GREENLIGHT_CONTROLLER <= '0';
-				REDLIGHT_CONTROLLER <= '0';
 				guessEntered := false;
 				
 				lifeCounter := 3;
+				currentLevelFlag := 1;
 				
 				state <= L1;
 		
@@ -213,6 +262,7 @@ begin  -- behavior
 				end if;
 			
 			when L5 => 
+				currentLevelFlag := 5;
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';
 				
@@ -234,7 +284,6 @@ begin  -- behavior
 				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
 				h0a <= '0'; h0b <= '0'; h0c <= '1'; h0d <= '0'; h0e <= '0'; h0f <= '1'; h0g <= '0'; -- displays value to be converted
 				
-				currentLevelFlag := 5;
 				if (enterGuess = '1') then
 					guessEntered := true;
 					-- Number base10 112
@@ -247,6 +296,7 @@ begin  -- behavior
 				end if;
 			
 			when L6 => 
+				currentLevelFlag := 6;
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';
 				
@@ -267,8 +317,7 @@ begin  -- behavior
 				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '1'; h2f <= '1'; h2g <= '0'; -- displays value to be converted
 				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
 				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
-				
-				currentLevelFlag := 6;
+
 				if (enterGuess = '1') then
 					guessEntered := true;
 					-- Number base10 341
@@ -281,6 +330,7 @@ begin  -- behavior
 				end if;
 				
 			when L7 => 
+				currentLevelFlag := 7;
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
 				
@@ -302,7 +352,6 @@ begin  -- behavior
 				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
 				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
 				
-				currentLevelFlag := 7;
 				if (enterGuess = '1') then
 					guessEntered := true;
 					-- Number base10 891
@@ -315,6 +364,7 @@ begin  -- behavior
 				end if;			
 			
 			when L8 => 
+				currentLevelFlag := 8;
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';
 				
@@ -336,8 +386,8 @@ begin  -- behavior
 				h1a <= '0'; h1b <= '1'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
 				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
 				
-				currentLevelFlag := 8;
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 2368
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='0' AND SW6 ='1' AND SW5 ='0' AND SW4 ='0' AND SW3 = '0' AND SW2 = '0' AND SW1 = '0' AND SW0 = '0') then
 						-- correct guess
@@ -372,6 +422,7 @@ begin  -- behavior
 				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '1'; -- displays value to be converted
 				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 5450
 					if (SW13 = '0' AND SW12 ='1' AND SW11 ='0' AND SW10 ='1' AND SW9 ='0' AND SW8 ='1' AND SW7 ='0' AND SW6 ='1' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
@@ -406,6 +457,7 @@ begin  -- behavior
 				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '1'; h0g <= '1'; -- displays value to be converted
 				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base10 8761
 					if (SW13 = '1' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='1' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
@@ -416,6 +468,7 @@ begin  -- behavior
 				end if;
 			
 			when L11 => 
+				currentLevelFlag := 11;
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';	
 				
@@ -430,8 +483,13 @@ begin  -- behavior
 					h4a <= '1'; h4b <= '0'; h4c <= '0'; h4d <= '1'; h4e <= '1'; h4f <= '1'; h4g <= '1'; -- displays the number of lives left
 				end if;
 				
-				currentLevelFlag := 11;
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '1'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '1'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 9
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
@@ -442,6 +500,7 @@ begin  -- behavior
 				end if;
 
 			when L12 => 
+				currentLevelFlag := 12;
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '0'; h6e <= '0'; h6f <= '1'; h6g <= '0';	
 				
@@ -458,7 +517,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '1'; -- displays value to be converted
+				h0a <= '0'; h0b <= '1'; h0c <= '1'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '1'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 C
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '1' AND SW1 = '0' AND SW0 = '0') then
 						-- correct guess
@@ -469,6 +534,7 @@ begin  -- behavior
 				end if;
 				
 			when L13 => 
+				currentLevelFlag := 13;
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';
 			
@@ -485,7 +551,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '1'; h1f <= '1'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '1'; h0d <= '0'; h0e <= '0'; h0f <= '1'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 32
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '0' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
@@ -496,6 +568,7 @@ begin  -- behavior
 				end if;
 				
 			when L14 => 
+				currentLevelFlag := 14;
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
 				
@@ -512,7 +585,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '1'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '1'; h0c <= '0'; h0d <= '0'; h0e <= '1'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 1A5
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
@@ -523,6 +602,7 @@ begin  -- behavior
 				end if;
 				
 			when L15 => 
+				currentLevelFlag := 15;
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
 				
@@ -539,7 +619,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '1'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '1'; h1c <= '1'; h1d <= '1'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 1F4
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='1' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '0') then
 						-- correct guess
@@ -550,6 +636,7 @@ begin  -- behavior
 				end if;
 				
 			when L16 =>
+				currentLevelFlag := 16;
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
 				
@@ -566,7 +653,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '1'; h2c <= '1'; h2d <= '1'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '1'; h0d <= '0'; h0e <= '0'; h0f <= '1'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 FA2
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
@@ -577,6 +670,7 @@ begin  -- behavior
 				end if; 
 				
 			when L17 => 
+				currentLevelFlag := 17;
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';	
 				
@@ -593,7 +687,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '1'; h3f <= '1'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '1'; h2c <= '1'; h2d <= '1'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 3F8A
 					if (SW13 = '1' AND SW12 ='1' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
@@ -604,6 +704,7 @@ begin  -- behavior
 				end if;
 				
 			when L18 => 
+				currentLevelFlag := 18;
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
 				
@@ -620,7 +721,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '1'; h3d <= '0'; h3e <= '0'; h3f <= '1'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '1'; h2c <= '1'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 2EAA					
 					if (SW13 = '1' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='0' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
@@ -631,6 +738,7 @@ begin  -- behavior
 				end if;
 				
 			when L19 => 
+				currentLevelFlag := 19;
 				h7a <= '1'; h7b <= '0'; h7c <= '0'; h7d <= '1'; h7e <= '1'; h7f <= '1'; h7g <= '1';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';
 			
@@ -647,7 +755,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '1'; h3d <= '0'; h3e <= '0'; h3f <= '1'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '1'; h2c <= '1'; h2d <= '1'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '1'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 2F9A
 					if (SW13 = '1' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='0' AND SW4 ='1' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
@@ -658,6 +772,7 @@ begin  -- behavior
 				end if;
 				
 			when L20 => 
+				currentLevelFlag := 20;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '1';	
 				
@@ -674,7 +789,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '1'; h3f <= '1'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '1'; h2c <= '1'; h2d <= '1'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
+				h1a <= '0'; h1b <= '1'; h1c <= '1'; h1d <= '1'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '1'; h0c <= '1'; h0d <= '1'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base16 3FFF
 					if (SW13 = '1' AND SW12 ='1' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '1' AND SW1 = '1' AND SW0 = '1') then
 						-- correct guess
@@ -685,8 +806,9 @@ begin  -- behavior
 				end if;
 				
 			when L21 => 
+				currentLevelFlag := 21;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
-				h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
+				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
 				
 				if (lifeCounter = 3) then
 					h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '1'; -- displays the number of lives left
@@ -701,7 +823,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '1'; -- displays value to be converted
+				h0a <= '0'; h0b <= '1'; h0c <= '0'; h0d <= '0'; h0e <= '1'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base8 5
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
@@ -712,6 +840,7 @@ begin  -- behavior
 				end if;
 				
 			when L22 => 
+				currentLevelFlag := 22;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '0'; h6c <= '1'; h6d <= '0'; h6e <= '0'; h6f <= '1'; h6g <= '0';
 				
@@ -729,6 +858,7 @@ begin  -- behavior
 				end if;
 				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base6 11
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
@@ -739,6 +869,7 @@ begin  -- behavior
 				end if;
 				
 			when L23 =>
+				currentLevelFlag := 23;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '1'; h6g <= '0';	
 				
@@ -756,6 +887,7 @@ begin  -- behavior
 				end if;
 				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base6 53
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '1') then
 						-- correct guess
@@ -766,6 +898,7 @@ begin  -- behavior
 				end if;
 				
 			when L24 => 
+				currentLevelFlag := 24;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '1'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
 				
@@ -783,6 +916,7 @@ begin  -- behavior
 				end if;
 				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base8 113
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='0' AND SW7 ='0' AND SW6 ='1' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '1') then
 						-- correct guess
@@ -793,6 +927,7 @@ begin  -- behavior
 				end if;
 				
 			when L25 => 
+				currentLevelFlag := 25;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '1'; h6f <= '0'; h6g <= '0';
 			
@@ -810,6 +945,7 @@ begin  -- behavior
 				end if;
 				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base8 672
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
@@ -820,6 +956,7 @@ begin  -- behavior
 				end if;
 				
 			when L26 => 
+				currentLevelFlag := 26;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '1'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
 				
@@ -837,6 +974,7 @@ begin  -- behavior
 				end if;
 				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base8 741					
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '0' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
@@ -847,6 +985,7 @@ begin  -- behavior
 				end if;
 				
 			when L27 =>
+				currentLevelFlag := 27;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '1'; h6g <= '1';
 				
@@ -863,7 +1002,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '1'; h3b <= '0'; h3c <= '0'; h3d <= '1'; h3e <= '1'; h3f <= '1'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
+				h0a <= '0'; h0b <= '1'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base8 1076
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='0' AND SW9 ='1' AND SW8 ='0' AND SW7 ='0' AND SW6 ='0' AND SW5 ='1' AND SW4 ='1' AND SW3 = '1' AND SW2 = '1' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
@@ -874,6 +1019,7 @@ begin  -- behavior
 				end if;
 				
 			when L28 => 
+				currentLevelFlag := 28;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0';	
 				
@@ -890,7 +1036,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '1'; h3d <= '0'; h3e <= '0'; h3f <= '1'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
+				h0a <= '0'; h0b <= '1'; h0c <= '0'; h0d <= '0'; h0e <= '1'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base8 2745
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='0' AND SW10 ='1' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='1' AND SW4 ='0' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '1') then
 						-- correct guess
@@ -901,6 +1053,7 @@ begin  -- behavior
 				end if;
 				
 			when L29 => 
+				currentLevelFlag := 29;
 				h7a <= '0'; h7b <= '0'; h7c <= '1'; h7d <= '0'; h7e <= '0'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '1'; h6e <= '1'; h6f <= '0'; h6g <= '0';	
 				
@@ -917,7 +1070,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '1'; h3c <= '0'; h3d <= '0'; h3e <= '0'; h3f <= '0'; h3g <= '0'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '0'; h1b <= '0'; h1c <= '1'; h1d <= '0'; h1e <= '0'; h1f <= '1'; h1g <= '0'; -- displays value to be converted
+				h0a <= '1'; h0b <= '0'; h0c <= '0'; h0d <= '1'; h0e <= '1'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base8 6724
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='0' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='0' AND SW4 ='1' AND SW3 = '0' AND SW2 = '1' AND SW1 = '0' AND SW0 = '0') then
 						-- correct guess
@@ -928,6 +1087,7 @@ begin  -- behavior
 				end if;
 				
 			when L30 => 
+				currentLevelFlag := 30;
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '1'; h7f <= '1'; h7g <= '0';
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '1';	
 				
@@ -944,7 +1104,13 @@ begin  -- behavior
 					state <= BuggedState;
 				end if;
 				
+				h3a <= '0'; h3b <= '0'; h3c <= '0'; h3d <= '1'; h3e <= '1'; h3f <= '1'; h3g <= '1'; -- displays value to be converted
+				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '1'; h2e <= '1'; h2f <= '1'; h2g <= '1'; -- displays value to be converted
+				h1a <= '1'; h1b <= '0'; h1c <= '0'; h1d <= '1'; h1e <= '1'; h1f <= '1'; h1g <= '1'; -- displays value to be converted
+				h0a <= '0'; h0b <= '0'; h0c <= '1'; h0d <= '0'; h0e <= '0'; h0f <= '1'; h0g <= '0'; -- displays value to be converted
+				
 				if (enterGuess = '1') then
+					guessEntered := true;
 					-- Number base8 7712
 					if (SW13 = '0' AND SW12 ='0' AND SW11 ='1' AND SW10 ='1' AND SW9 ='1' AND SW8 ='1' AND SW7 ='1' AND SW6 ='1' AND SW5 ='0' AND SW4 ='0' AND SW3 = '1' AND SW2 = '0' AND SW1 = '1' AND SW0 = '0') then
 						-- correct guess
@@ -975,9 +1141,6 @@ begin  -- behavior
 				end if;
 				
 				-- Flash red lights
-				if (blinkFlag) then
-					REDLIGHT_CONTROLLER <= not REDLIGHT_CONTROLLER;
-				end if;
 				LEDR0 <= REDLIGHT_CONTROLLER;
 				LEDR1 <= REDLIGHT_CONTROLLER;
 				LEDR2 <= REDLIGHT_CONTROLLER;
@@ -1064,14 +1227,13 @@ begin  -- behavior
 						state <= L29;
 					elsif (currentLevelFlag = 30) then
 						state <= L30;
+					else
+						state <= BuggedState;
 					end if;
 				end if;			
 			
 			when CorrectState =>
 				-- Flash green lights
-				if (blinkFlag) then
-					GREENLIGHT_CONTROLLER <= not GREENLIGHT_CONTROLLER;
-				end if;
 				LEDG0 <= GREENLIGHT_CONTROLLER;
 				LEDG1 <= GREENLIGHT_CONTROLLER;
 				LEDG2 <= GREENLIGHT_CONTROLLER;
@@ -1148,10 +1310,16 @@ begin  -- behavior
 						state <= L30;
 					elsif (currentLevelFlag = 30) then
 						state <= FinalWin;
+					else
+						state <= BuggedState;
 					end if;
 				end if;
 			
 			when FinalWin =>
+				if (lifeCounter = 3) then
+					-- print out some cool message here
+				end if;
+			
 				h7a <= '0'; h7b <= '0'; h7c <= '0'; h7d <= '0'; h7e <= '0'; h7f <= '0'; h7g <= '0'; -- displays on hex what the current level is
 				h6a <= '0'; h6b <= '0'; h6c <= '0'; h6d <= '0'; h6e <= '0'; h6f <= '0'; h6g <= '0'; -- displays on hex what the current level is
 				h5a <= '0'; h5b <= '0'; h5c <= '0'; h5d <= '0'; h5e <= '0'; h5f <= '0'; h5g <= '0'; -- displays the number of lives left
@@ -1160,6 +1328,9 @@ begin  -- behavior
 				h2a <= '0'; h2b <= '0'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
 				h1a <= '0'; h1b <= '0'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
 				h0a <= '0'; h0b <= '0'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				-- turn on the green lights
+				LEDG0 <= '1'; LEDG1 <= '1'; LEDG2 <= '1'; LEDG3 <= '1'; LEDG4 <= '1'; LEDG5 <= '1'; LEDG6 <= '1'; LEDG7 <= '1';
+				
 				--state <= ResetState;
 			
 			when FinalLoss =>
@@ -1171,66 +1342,21 @@ begin  -- behavior
 				h2a <= '1'; h2b <= '1'; h2c <= '0'; h2d <= '0'; h2e <= '0'; h2f <= '0'; h2g <= '0'; -- displays value to be converted
 				h1a <= '1'; h1b <= '1'; h1c <= '0'; h1d <= '0'; h1e <= '0'; h1f <= '0'; h1g <= '0'; -- displays value to be converted
 				h0a <= '1'; h0b <= '1'; h0c <= '0'; h0d <= '0'; h0e <= '0'; h0f <= '0'; h0g <= '0'; -- displays value to be converted
+				-- turn on the red lights
+				LEDR0 <= '1'; LEDR1 <= '1'; LEDR2 <= '1'; LEDR3 <= '1'; LEDR4 <= '1'; LEDR5 <= '1'; LEDR6 <= '1'; LEDR7 <= '1'; LEDR8 <= '1'; LEDR9 <= '1';
+				LEDR10 <= '1'; LEDR11 <= '1'; LEDR12 <= '1'; LEDR13 <= '1'; LEDR14 <= '1'; LEDR15 <= '1'; LEDR16 <= '1'; LEDR17 <= '1';
+				
 				--state <= ResetState;
 			
-			when others => null;
+			when others => state <= BuggedState;
+		
+	--	=> null;
 			
 			end case;
 			
 		end if;
 			
 	end process gameProcess;
-
-	updateCounter : process (clk) is
-	begin
-		--if resetSW17 = '1' then   -- asynchronous reset
-		--	counter <= (others => '0');
-		--	redLightCounter <= (others => '0');
-		--	greenLightCounter <= (others => '0');
-		--	delay_3s <= (others => '0');
-		--	delay_10s <= (others => '0');
-		--elsif clk'event and clk = '1' then
-		if clk'event and clk = '1' then
-			if redLightCounter < "1011111010111100001000000" then
-				redLightCounter <= redLightCounter + 8;
-				greenLightCounter <= greenLightCounter + 8;
-			else
-				blinkFlag := not blinkFlag;
-				redLightCounter <= (others => '0');
-				greenLightCounter <= (others => '0');
-			end if;
-			
-         if counter < "1011111010111100001000000" then
-				counter <= counter + 1;
-			else 
-				delay_3s <= delay_3s + 1;
-				delay_10s <= delay_10s + 1;
-				counter <= (others => '0');
-				
-				-- 3s
-				if (delay_3s = 3) then
-					delay3sIsOver := true;
-					delay_3s <= (others => '0');
-				end if;
-				
-				-- 10s
-				if (delay_10s = 10) then
-					delay10sIsOver := true;
-					delay_10s <= (others => '0');
-				end if;
-				
-				-- Reset these when they are not in use
-				if (guessEntered = false) then
-					delay3sIsOver := false;
-					delay10sIsOver := false;
-					delay_3s <= (others => '0');
-					delay_10s <= (others => '0');
-				end if;				
-			end if;
-			
-		end if;
-	  
-   end process updateCounter;
 	
 end behavior;		
 			
